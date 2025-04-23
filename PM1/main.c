@@ -2,28 +2,43 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MAX_EVENTOS 500
+#define MAX_EVENTOS_FECHA 24  // máximo 1 evento por hora
+
 // -------------------------
-// Definiciones de tipos
+// Estructuras auxiliares
 // -------------------------
 typedef struct {
     int dia, mes, anio;
 } Fecha;
 
 typedef struct {
-    int hora;           // una hora por evento
+    int hora;
     char evento[50];
     char lugar[50];
 } Evento;
 
-// -------------------------
-// Estructuras sin dependencia funcional
-// -------------------------
-typedef struct NodoLSOBB {
+typedef struct {
     Fecha fecha;
     Evento evento;
-    struct NodoLSOBB* sig;
-} NodoLSOBB;
+} RegistroLSOBB;  // sin dependencia funcional
 
+typedef struct {
+    Fecha fecha;
+    Evento eventos[MAX_EVENTOS_FECHA];
+    int cantidadEventos;
+} RegistroLSOBB_F;  // forzando dependencia funcional
+
+
+// LSO sin dependencia funcional
+RegistroLSOBB agendaLSOBB[MAX_EVENTOS];
+int totalLSOBB = 0;
+
+// LSO con dependencia funcional
+RegistroLSOBB_F agendaLSOBB_F[MAX_EVENTOS];
+int totalLSOBB_F = 0;
+
+// ABB sin dependencia funcional
 typedef struct NodoABB {
     Fecha fecha;
     Evento evento;
@@ -31,43 +46,24 @@ typedef struct NodoABB {
     struct NodoABB* der;
 } NodoABB;
 
-// -------------------------
-// Estructuras con dependencia funcional
-// -------------------------
-typedef struct EventoLista {
-    Evento evento;
-    struct EventoLista* sig;
-} EventoLista;
-
-typedef struct NodoLSOBB_F {
-    Fecha fecha;
-    EventoLista* listaEventos;
-    struct NodoLSOBB_F* sig;
-} NodoLSOBB_F;
-
+// ABB con dependencia funcional
 typedef struct NodoABB_F {
     Fecha fecha;
-    EventoLista* listaEventos;
+    Evento eventos[MAX_EVENTOS_FECHA];  // un evento por hora
+    int cantidadEventos;
     struct NodoABB_F* izq;
     struct NodoABB_F* der;
 } NodoABB_F;
 
-// -------------------------
 // Prototipos
-// -------------------------
 void menuPrincipal();
 
-// -------------------------
-// Función principal
 // -------------------------
 int main() {
     menuPrincipal();
     return 0;
 }
 
-// -------------------------
-// Menú principal
-// -------------------------
 void menuPrincipal() {
     int opcion;
 
