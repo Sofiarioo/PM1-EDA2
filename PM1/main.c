@@ -77,16 +77,16 @@ void menuPrincipal() {
 
         switch(opcion) {
             case 1:
-                printf(">> Comparación de estructuras (a implementar)\n");
+                printf(">> Comparacion de estructuras (a implementar)\n");
                 break;
             case 2:
-                printf(">> Administración de estructura (a implementar)\n");
+                printf(">> Administracion de estructura (a implementar)\n");
                 break;
             case 0:
                 printf(">> Saliendo...\n");
                 break;
             default:
-                printf(">> Opción inválida. Intente de nuevo.\n");
+                printf(">> Opción invalida. Intente de nuevo.\n");
         }
     } while(opcion != 0);
 }
