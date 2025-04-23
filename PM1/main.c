@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_EVENTOS 500
+#define MAX_EVENTOS 744 //24 eventos al dia * 31 dias
 #define MAX_EVENTOS_FECHA 24 // máximo 1 evento por hora
 
 // -------------------------
@@ -20,45 +20,34 @@ typedef struct
     char lugar[50];
 } Evento;
 
-typedef struct
-{
+// LSO
+typedef struct {
     Fecha fecha;
     Evento evento;
-} RegistroLSOBB; // sin dependencia funcional
-
-typedef struct
-{
-    Fecha fecha;
-    Evento eventos[MAX_EVENTOS_FECHA];
-    int cantidadEventos;
-} RegistroLSOBB_F; // forzando dependencia funcional
+} LSOBB;
 
 // LSO sin dependencia funcional
-RegistroLSOBB agendaLSOBB[MAX_EVENTOS];
+LSOBB agendaLSOBB[MAX_EVENTOS];
 int totalLSOBB = 0;
 
 // LSO con dependencia funcional
-RegistroLSOBB_F agendaLSOBB_F[MAX_EVENTOS];
+LSOBB agendaLSOBB_F[MAX_EVENTOS];
 int totalLSOBB_F = 0;
 
-// ABB sin dependencia funcional
-typedef struct NodoABB
-{
+// ABB-F (forzando dependencia funcional): un solo evento por fecha
+typedef struct NodoABB_F {
     Fecha fecha;
     Evento evento;
-    struct NodoABB *izq;
-    struct NodoABB *der;
-} NodoABB;
-
-// ABB con dependencia funcional
-typedef struct NodoABB_F
-{
-    Fecha fecha;
-    Evento eventos[MAX_EVENTOS_FECHA]; // un evento por hora
-    int cantidadEventos;
-    struct NodoABB_F *izq;
-    struct NodoABB_F *der;
+    struct NodoABB_F *izq, *der;
 } NodoABB_F;
+
+// ABB sin dependencia funcional: múltiples eventos por fecha
+typedef struct NodoABB {
+    Fecha fecha;
+    Evento eventos[MAX_EVENTOS_FECHA];
+    int cantidadEventos;
+    struct NodoABB *izq, *der;
+} NodoABB;
 
 // Prototipos
 void menuPrincipal();
