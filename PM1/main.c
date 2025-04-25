@@ -34,20 +34,20 @@ int totalLSOBB = 0;
 LSOBB agendaLSOBB_F[MAX_EVENTOS];
 int totalLSOBB_F = 0;
 
-// ABB-F (forzando dependencia funcional): un solo evento por fecha
-typedef struct NodoABB_F {
+// ABB sin dependencia funcional: múltiples eventos por fecha
+typedef struct NodoABB {
     Fecha fecha;
     Evento evento;
     struct NodoABB_F *izq, *der;
-} NodoABB_F;
+} NodoABB;
 
-// ABB sin dependencia funcional: múltiples eventos por fecha
-typedef struct NodoABB {
+// ABB-F (forzando dependencia funcional): un conjunto de eventos por fecha
+typedef struct NodoABB_F {
     Fecha fecha;
     Evento eventos[MAX_EVENTOS_FECHA];
     int cantidadEventos;
     struct NodoABB *izq, *der;
-} NodoABB;
+} NodoABB_F;
 
 // Prototipos
 void menuPrincipal();
@@ -67,10 +67,10 @@ void menuPrincipal()
     do
     {
         printf("\n=== Agenda Mensual ===\n");
-        printf("1. Comparación de Estructuras\n");
-        printf("2. Administrar Estructura\n");
+        printf("1. Comparacion de Estructuras\n");
+        printf("2. Administrar Estructuras\n");
         printf("0. Salir\n");
-        printf("Seleccione una opción: ");
+        printf("Seleccione una opcion: ");
         scanf("%d", &opcion);
 
         switch (opcion)
