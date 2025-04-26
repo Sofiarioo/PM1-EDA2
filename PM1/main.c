@@ -6,7 +6,7 @@
 #define MAX_EVENTOS_FECHA 24 // máximo 1 evento por hora
 
 // -------------------------
-// Estructuras auxiliares
+// Estructuras 
 // -------------------------
 typedef struct
 {
@@ -20,25 +20,24 @@ typedef struct
     char lugar[50];
 } Evento;
 
-// LSO
+// LSO sin forzar dp. funcional
 typedef struct {
     Fecha fecha;
     Evento evento;
 } LSOBB;
 
-// LSO sin dependencia funcional
-LSOBB agendaLSOBB[MAX_EVENTOS];
-int totalLSOBB = 0;
-
-// LSO con dependencia funcional
-LSOBB agendaLSOBB_F[MAX_EVENTOS];
-int totalLSOBB_F = 0;
+//LSO forzando dp. funcional
+typedef struct {
+    Fecha fecha;
+    Evento evento[MAX_EVENTOS_FECHA];
+    int cantidadEventos;
+} LSOBB_F;
 
 // ABB sin dependencia funcional: múltiples eventos por fecha
 typedef struct NodoABB {
     Fecha fecha;
     Evento evento;
-    struct NodoABB_F *izq, *der;
+    struct NodoABB *izq, *der;
 } NodoABB;
 
 // ABB-F (forzando dependencia funcional): un conjunto de eventos por fecha
@@ -46,8 +45,18 @@ typedef struct NodoABB_F {
     Fecha fecha;
     Evento eventos[MAX_EVENTOS_FECHA];
     int cantidadEventos;
-    struct NodoABB *izq, *der;
+    struct NodoABB_F *izq, *der;
 } NodoABB_F;
+
+//--------INICIALIZACION ESTRUCTURAS-----------
+
+// LSO sin dependencia funcional
+LSOBB agendaLSOBB[MAX_EVENTOS];
+int totalLSOBB = 0;
+
+// LSO con dependencia funcional
+LSOBB_F agendaLSOBB_F[MAX_EVENTOS];
+int totalLSOBB_F = 0;
 
 // Prototipos
 void menuPrincipal();
@@ -77,9 +86,11 @@ void menuPrincipal()
         {
         case 1:
             printf(">> Comparacion de estructuras (a implementar)\n");
+            //menuMostrarEstructuras();
             break;
         case 2:
             printf(">> Administracion de estructura (a implementar)\n");
+            //menuAdministrarEstructuras();
             break;
         case 0:
             printf(">> Saliendo...\n");
