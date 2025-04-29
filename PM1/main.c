@@ -10,39 +10,31 @@
 // -------------------------
 typedef struct
 {
-    int dia, mes, anio;
-} Fecha;
-
-typedef struct
-{
+    char fecha[11]; //formato: AAAA-MM-DD
     int hora;
-    char evento[50];
-    char lugar[50];
+    char evento[81];
+    char lugar[81];
 } Evento;
 
 // LSO sin forzar dp. funcional
 typedef struct {
-    Fecha fecha;
     Evento evento;
 } LSOBB;
 
 //LSO forzando dp. funcional
 typedef struct {
-    Fecha fecha;
     Evento evento[MAX_EVENTOS_FECHA];
     int cantidadEventos;
 } LSOBB_F;
 
 // ABB sin dependencia funcional: múltiples eventos por fecha
 typedef struct NodoABB {
-    Fecha fecha;
     Evento evento;
     struct NodoABB *izq, *der;
 } NodoABB;
 
 // ABB-F (forzando dependencia funcional): un conjunto de eventos por fecha
 typedef struct NodoABB_F {
-    Fecha fecha;
     Evento eventos[MAX_EVENTOS_FECHA];
     int cantidadEventos;
     struct NodoABB_F *izq, *der;
@@ -61,6 +53,8 @@ int totalLSOBB_F = 0;
 // Prototipos
 void menuPrincipal();
 int Lectura_Operaciones();
+void menuMostrarEstructuras();
+void menuAdministrarEstructuras();
 
 // -------------------------
 int main()
@@ -86,11 +80,11 @@ void menuPrincipal()
         {
         case 1:
             printf(">> Comparacion de estructuras (a implementar)\n");
-            //menuMostrarEstructuras();
+            menuMostrarEstructuras();
             break;
         case 2:
             printf(">> Administracion de estructura (a implementar)\n");
-            //menuAdministrarEstructuras();
+            menuAdministrarEstructuras();
             break;
         case 0:
             printf(">> Saliendo...\n");
@@ -104,49 +98,34 @@ void menuPrincipal()
 int LecturaOperaciones() {
     FILE *fp;
     int codigoOperador;
-    Fecha auxFecha;
     Evento aux;
 
-    if ((fp = fopen("Operaciones.txt", "rt")) == NULL) {
+    if ((fp = fopen("Operaciones.txt", "r")) == NULL) {
         printf("Error al abrir el archivo de operaciones.\n");
         return 0;
     }
 
     while (!feof(fp)) {
-        if (fscanf(fp, "%d\n", &codigoOperador) != 1) break;
+        fscanf(fp, "%d", &codigoOperador);        
+        fscanf(fp, " %[^\n]", aux.fecha); // fecha: formato AAAA-MM-DD
 
-        if (codigoOperador == 1 || codigoOperador == 2) {
-            // Leer fecha: formato AAAA-MM-DD
-            fscanf(fp, "%d-%d-%d\n", &auxFecha.anio, &auxFecha.mes, &auxFecha.dia);
+        if (codigoOperador == 1 || codigoOperador == 2) {                       
+            fscanf(fp, " %[^\n]", aux.evento);
+            fscanf(fp, "%d", &aux.hora);
+            fscanf(fp, " %[^\n]", aux.lugar);
 
-            // Leer evento (con espacios hasta fin de línea)
-            fgets(aux.evento, sizeof(aux.evento), fp);
-            aux.evento[strcspn(aux.evento, "\n")] = '\0'; // quitar salto de línea
-
-            // Leer hora
-            fscanf(fp, "%d\n", &aux.hora);
-
-            // Leer lugar (con espacios hasta fin de línea)
-            fgets(aux.lugar, sizeof(aux.lugar), fp);
-            aux.lugar[strcspn(aux.lugar, "\n")] = '\0';
-
-            if (codigoOperador == 1) {
-                printf("[Alta] %04d-%02d-%02d %02dhs - %s @ %s\n",
-                       auxFecha.anio, auxFecha.mes, auxFecha.dia,
-                       aux.hora, aux.evento, aux.lugar);
-                // Alta en estructuras...
-            } else {
-                printf("[Baja] %04d-%02d-%02d %02dhs - %s @ %s\n",
-                       auxFecha.anio, auxFecha.mes, auxFecha.dia,
-                       aux.hora, aux.evento, aux.lugar);
-                // Baja en estructuras...
+            if (codigoOperador == 1) { //ALTA
+            //    printf("[Alta] %04d-%02d-%02d %02dhs - %s @ %s\n",
+            //           auxFecha.anio, auxFecha.mes, auxFecha.dia,
+            //           aux.hora, aux.evento, aux.lugar);                
+            } else { //BAJA
+            //    printf("[Baja] %04d-%02d-%02d %02dhs - %s @ %s\n",
+            //           auxFecha.anio, auxFecha.mes, auxFecha.dia,
+            //           aux.hora, aux.evento, aux.lugar);
             }
 
-        } else if (codigoOperador == 3) {
-            // Leer solo la fecha para la evocación
-            fscanf(fp, "%d-%d-%d\n", &auxFecha.anio, &auxFecha.mes, &auxFecha.dia);
-            printf("[Evocar] %04d-%02d-%02d\n", auxFecha.anio, auxFecha.mes, auxFecha.dia);
-            // Evocar en estructuras...
+        } else if (codigoOperador == 3) {            
+            // Evocar en estructuras
         } else {
             printf(">> Código no reconocido: %d\n", codigoOperador);
         }
