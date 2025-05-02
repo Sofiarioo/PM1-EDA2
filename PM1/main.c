@@ -30,7 +30,6 @@ typedef struct {
 //LSO forzando dp. funcional
 typedef struct {
     NodoEvento* listaEventos;
-    int cantidadEventos;
 } LSOBB_F;
 
 // ABB sin dependencia funcional: múltiples eventos por fecha
@@ -42,14 +41,12 @@ typedef struct NodoABB {
 // ABB-F (forzando dependencia funcional): un conjunto de eventos por fecha
 typedef struct NodoABB_F {
     NodoEvento* listaEventos;
-    int cantidadEventos;
     struct NodoABB_F *izq, *der;
 } NodoABB_F;
 
 // Prototipos
 void menuPrincipal();
 int Lectura_Operaciones();
-void menuMostrarEstructuras();
 void menuAdministrarEstructuras();
 
 // -------------------------
@@ -62,6 +59,12 @@ int main()
 void menuPrincipal()
 {
     int opcion;
+    NodoABB* raiz = NULL;
+    NodoABB_F* raiz_f = NULL;
+    LSOBB_F lista_f[MAX_EVENTOS];  
+    int cargadosLSO_F = 0;
+    LSOBB lista[MAX_EVENTOS];
+    int cargadosLSO = 0;
 
     do
     {
@@ -75,8 +78,7 @@ void menuPrincipal()
         switch (opcion)
         {
         case 1:
-            printf(">> Comparacion de estructuras (a implementar)\n");
-            menuMostrarEstructuras();
+            comparacionEstructuras(**raiz, **raiz_f, *lista_f, *lista, *cargadosLSO_F, *cargadosLSO);
             break;
         case 2:
             printf(">> Administracion de estructura (a implementar)\n");
@@ -89,6 +91,32 @@ void menuPrincipal()
             printf(">> Opción invalida. Intente de nuevo.\n");
         }
     } while (opcion != 0);
+}
+
+
+// --- Operaciones de LSO 
+
+
+// --- Operaciones de ABB
+
+// todos los eventos en listaEventos tienen la misma fecha, que se puede obtener de:
+// ------------- >    nodo->listaEventos->evento.fecha
+
+
+//------------------------------
+
+void comparacionEstructuras(NodoABB** raiz, NodoABB_F** raiz_f, LSOBB lista[], int* totalLSOBB, LSOBB_F lista_f[], int* totalLSOBB_F){
+    int i = 0;
+    // Limpiar Estructuras
+    while(lista_f[i].listaEventos != NULL && i < *totalLSOBB_F) {
+        lista_f[i].listaEventos = NULL;
+        i++;
+    }
+
+    *raiz = NULL;
+    *raiz_f = NULL;
+    *totalLSOBB = 0;
+    *totalLSOBB_F = 0;    
 }
 
 int LecturaOperaciones() {
