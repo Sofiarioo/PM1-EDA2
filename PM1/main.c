@@ -5,8 +5,10 @@
 #define MAX_EVENTOS 744 //24 eventos al dia * 31 dias
 #define MAX_EVENTOS_FECHA 24 // máximo 1 evento por hora
 
+///pedo
+
 // -------------------------
-// Estructuras 
+// Estructuras
 // -------------------------
 typedef struct
 {
@@ -48,6 +50,7 @@ typedef struct NodoABB_F {
 void menuPrincipal();
 int Lectura_Operaciones();
 void menuAdministrarEstructuras();
+void comparacionEstructuras();
 
 // -------------------------
 int main()
@@ -61,7 +64,7 @@ void menuPrincipal()
     int opcion;
     NodoABB* raiz = NULL;
     NodoABB_F* raiz_f = NULL;
-    LSOBB_F lista_f[MAX_EVENTOS];  
+    LSOBB_F lista_f[MAX_EVENTOS];
     int cargadosLSO_F = 0;
     LSOBB lista[MAX_EVENTOS];
     int cargadosLSO = 0;
@@ -78,11 +81,12 @@ void menuPrincipal()
         switch (opcion)
         {
         case 1:
-            comparacionEstructuras(**raiz, **raiz_f, *lista_f, *lista, *cargadosLSO_F, *cargadosLSO);
+            // comparacionEstructuras(NodoABB** raiz, NodoABB_F** raiz_f, LSOBB lista[], LSOBB_F lista_f[], int* totalLSOBB, int* totalLSOBB_F){
+            comparacionEstructuras(&raiz, &raiz_f,lista, lista_f,&cargadosLSO,&cargadosLSO_F);
             break;
         case 2:
             printf(">> Administracion de estructura (a implementar)\n");
-            menuAdministrarEstructuras();
+           // menuAdministrarEstructuras();
             break;
         case 0:
             printf(">> Saliendo...\n");
@@ -94,7 +98,7 @@ void menuPrincipal()
 }
 
 
-// --- Operaciones de LSO 
+// --- Operaciones de LSO
 
 
 // --- Operaciones de ABB
@@ -105,7 +109,7 @@ void menuPrincipal()
 
 //------------------------------
 
-void comparacionEstructuras(NodoABB** raiz, NodoABB_F** raiz_f, LSOBB lista[], int* totalLSOBB, LSOBB_F lista_f[], int* totalLSOBB_F){
+void comparacionEstructuras(NodoABB** raiz, NodoABB_F** raiz_f, LSOBB lista[], LSOBB_F lista_f[], int* totalLSOBB, int* totalLSOBB_F){
     int i = 0;
     // Limpiar Estructuras
     while(lista_f[i].listaEventos != NULL && i < *totalLSOBB_F) {
@@ -116,7 +120,7 @@ void comparacionEstructuras(NodoABB** raiz, NodoABB_F** raiz_f, LSOBB lista[], i
     *raiz = NULL;
     *raiz_f = NULL;
     *totalLSOBB = 0;
-    *totalLSOBB_F = 0;    
+    *totalLSOBB_F = 0;
 }
 
 int LecturaOperaciones() {
@@ -130,10 +134,10 @@ int LecturaOperaciones() {
     }
 
     while (!feof(fp)) {
-        fscanf(fp, "%d", &codigoOperador);        
+        fscanf(fp, "%d", &codigoOperador);
         fscanf(fp, " %[^\n]", aux.fecha); // fecha: formato AAAA-MM-DD
 
-        if (codigoOperador == 1 || codigoOperador == 2) {                       
+        if (codigoOperador == 1 || codigoOperador == 2) {
             fscanf(fp, " %[^\n]", aux.evento);
             fscanf(fp, "%d", &aux.hora);
             fscanf(fp, " %[^\n]", aux.lugar);
@@ -141,14 +145,14 @@ int LecturaOperaciones() {
             if (codigoOperador == 1) { //ALTA
             //    printf("[Alta] %04d-%02d-%02d %02dhs - %s @ %s\n",
             //           auxFecha.anio, auxFecha.mes, auxFecha.dia,
-            //           aux.hora, aux.evento, aux.lugar);                
+            //           aux.hora, aux.evento, aux.lugar);
             } else { //BAJA
             //    printf("[Baja] %04d-%02d-%02d %02dhs - %s @ %s\n",
             //           auxFecha.anio, auxFecha.mes, auxFecha.dia,
             //           aux.hora, aux.evento, aux.lugar);
             }
 
-        } else if (codigoOperador == 3) {            
+        } else if (codigoOperador == 3) {
             // Evocar en estructuras
         } else {
             printf(">> Código no reconocido: %d\n", codigoOperador);
