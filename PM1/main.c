@@ -16,6 +16,12 @@ typedef struct
     char lugar[81];
 } Evento;
 
+//LVO aux
+typedef struct {
+    Evento evento;
+    struct NodoEvento* sig;
+} NodoEvento;
+
 // LSO sin forzar dp. funcional
 typedef struct {
     Evento evento;
@@ -23,7 +29,7 @@ typedef struct {
 
 //LSO forzando dp. funcional
 typedef struct {
-    Evento evento[MAX_EVENTOS_FECHA];
+    NodoEvento* listaEventos;
     int cantidadEventos;
 } LSOBB_F;
 
@@ -35,20 +41,10 @@ typedef struct NodoABB {
 
 // ABB-F (forzando dependencia funcional): un conjunto de eventos por fecha
 typedef struct NodoABB_F {
-    Evento eventos[MAX_EVENTOS_FECHA];
+    NodoEvento* listaEventos;
     int cantidadEventos;
     struct NodoABB_F *izq, *der;
 } NodoABB_F;
-
-//--------INICIALIZACION ESTRUCTURAS-----------
-
-// LSO sin dependencia funcional
-LSOBB agendaLSOBB[MAX_EVENTOS];
-int totalLSOBB = 0;
-
-// LSO con dependencia funcional
-LSOBB_F agendaLSOBB_F[MAX_EVENTOS];
-int totalLSOBB_F = 0;
 
 // Prototipos
 void menuPrincipal();
