@@ -56,10 +56,18 @@ void comparacionEstructuras();
 
 // -------------------------
 
-Costos costosLSO = {0, 0, 0};
-Costos costosLSO_F = {0, 0, 0};
-Costos costosABB = {0, 0, 0};
-Costos costosABB_F = {0, 0, 0};
+Costos cLSOevoc = {0, 0, 0};
+Costos cLSOalta = {0, 0, 0};
+Costos cLSObaja = {0, 0, 0};
+Costos cLSO_Fevoc = {0, 0, 0};
+Costos cLSO_Falta = {0, 0, 0};
+Costos cLSO_Fbaja = {0, 0, 0};
+Costos cABBevoc = {0, 0, 0};
+Costos cABBalta = {0, 0, 0};
+Costos cABBbaja = {0, 0, 0};
+Costos cABB_Fevoc = {0, 0, 0};
+Costos cABB_Falta = {0, 0, 0};
+Costos cABB_Fbaja = {0, 0, 0};
 
 int main()
 {
@@ -194,4 +202,46 @@ int Lectura_Operaciones(NodoABB** raiz, NodoABB_F** raiz_f, LSOBB lista[], LSOBB
 
     fclose(fp);
     return 1;
+}
+
+/**RETORNA 1 SI SON IGUALES 0 SI NO*/
+int compararEventos(Evento evento1, Evento evento2){
+    if((strcasecmp(evento1.evento,evento2.evento))==0 && evento1.hora==evento2.hora && (strcasecmp(evento1.fecha,evento2.fecha))==0 && (strcasecmp(evento1.lugar,evento2.lugar))==0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+void mostrarEvento(Evento e){
+    printf("Evento: %s\n", e.evento);
+    printf("Fecha: %s\n", e.fecha);
+    printf("Hora: %d\n", e.hora);
+    printf("Lugar: %s\n", e.lugar);
+}
+
+void cuadroComp(void){
+    system("cls");
+    system("color 03");
+    printf("##======================================================================================================##\n");
+    printf("||                                    COMPARACION DE ESTRUCTURAS                                        ||\n");
+    printf("##======================================================================================================##\n");
+    printf("||                      ||  COSTOS LSOBB   ||   COSTOS LSOBB_F   ||   COSTOS ABB    ||   COSTOS ABB_F   ||\n");
+    printf("##======================================================================================================##\n");
+    printf("|| MAX. EVOC. EX.       ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+
+    printf("|| MED. EVOC. EX.       ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+
+    printf("|| MAX. ALTA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+
+    printf("|| MED. ALTA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+
+    printf("|| MAX. BAJA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+
+    printf("|| MED. BAJA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+    //AGREGAR CONTROLES NECESARIOS Y VARIABLES
+    printf("||============================================================================||\n");
+    system("pause");
+    system("cls");
 }
