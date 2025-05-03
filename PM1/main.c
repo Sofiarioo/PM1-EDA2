@@ -2,49 +2,55 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_EVENTOS 744 //24 eventos al dia * 31 dias
+#define MAX_EVENTOS 744      // 24 eventos al dia * 31 dias
 #define MAX_EVENTOS_FECHA 24 // máximo 1 evento por hora
 
 // -------------------------
 // Estructuras
 // -------------------------
-typedef struct {
+typedef struct
+{
     int max, sumatoria, cantidad;
 } Costos;
 
 typedef struct
 {
-    char fecha[11]; //formato: AAAA-MM-DD
+    char fecha[11]; // formato: AAAA-MM-DD
     int hora;
     char evento[81];
     char lugar[81];
 } Evento;
 
-//LVO aux
-typedef struct {
+// LVO aux
+typedef struct
+{
     Evento evento;
-    struct NodoEvento* sig;
+    struct NodoEvento *sig;
 } NodoEvento;
 
 // LSO sin forzar dp. funcional
-typedef struct {
+typedef struct
+{
     Evento evento;
 } LSOBB;
 
-//LSO forzando dp. funcional
-typedef struct {
-    NodoEvento* listaEventos;
+// LSO forzando dp. funcional
+typedef struct
+{
+    NodoEvento *listaEventos;
 } LSOBB_F;
 
 // ABB sin dependencia funcional: múltiples eventos por fecha
-typedef struct NodoABB {
+typedef struct NodoABB
+{
     Evento evento;
     struct NodoABB *izq, *der;
 } NodoABB;
 
 // ABB-F (forzando dependencia funcional): un conjunto de eventos por fecha
-typedef struct NodoABB_F {
-    NodoEvento* listaEventos;
+typedef struct NodoABB_F
+{
+    NodoEvento *listaEventos;
     struct NodoABB_F *izq, *der;
 } NodoABB_F;
 
@@ -77,9 +83,9 @@ int main()
 
 void menuPrincipal()
 {
-    int opcion;
-    NodoABB* raiz = NULL;
-    NodoABB_F* raiz_f = NULL;
+    int opc, opcion, opcion2;
+    NodoABB *raiz = NULL;
+    NodoABB_F *raiz_f = NULL;
     LSOBB_F lista_f[MAX_EVENTOS];
     int cargadosLSO_F = 0;
     LSOBB lista[MAX_EVENTOS];
@@ -87,21 +93,71 @@ void menuPrincipal()
 
     do
     {
+        system("cls");
         printf("\n=== Agenda Mensual ===\n");
         printf("1. Comparacion de Estructuras\n");
         printf("2. Administrar Estructuras\n");
         printf("0. Salir\n");
-        printf("Seleccione una opcion: ");
-        scanf("%d", &opcion);
+        printf("Seleccione una opcion: \n");
+        scanf("%d", &opc);
 
-        switch (opcion)
+        switch (opc)
         {
         case 1:
             comparacionEstructuras(&raiz, &raiz_f, lista, lista_f, &cargadosLSO, &cargadosLSO_F);
             break;
         case 2:
-            printf(">> Administracion de estructura (a implementar)\n");
-            menuAdministrarEstructuras();
+            do
+            {
+                printf("\nADMINISTRAR ESTRUCTURA\n");
+                printf("1. Mostrar Estructura.\n");
+                printf("2. Evocar.\n");
+                printf("0. Volver\n");
+                printf("Seleccione una opcion: \n");
+                scanf("%d", &opcion2);
+
+                switch (opcion2)
+                {
+                case 1:
+                do {
+                    printf("1. Mostrar LSO sin forzar dependencia.\n");
+                    printf("2. Mostrar LSO forzando dependencia.\n");
+                    printf("3. Mostrar ABB sin forzar dependencia..\n");
+                    printf("4. Mostrar ABB forzando dependencia.\n");
+                    printf("0. Volver\n");
+                    printf("Seleccione una opcion: \n");
+                    scanf("%d", &opcion);
+                    switch (opcion)
+                    {
+                    case 1:
+                        // mostrarLSOBB();
+                        break;
+                    case 2:
+                        // mostrarLSOBB_F();
+                        break;
+                    case 3:
+                        // mostrarABB();
+                        break;
+                    case 4:
+                        // mostrarABB_F();
+                        break;
+                    case 0:
+                        printf(">> Volviendo...\n");
+                        break;
+                    default:
+                        printf(">> Opción invalida. Intente de nuevo.\n");
+                    }
+                } while (opcion != 0);    
+                case 2:
+                    // EVOCAR
+                    break;
+                case 0:
+                    printf(">> Volviendo...\n");
+                    break;
+                default:
+                    printf(">> Opción invalida. Intente de nuevo.\n");
+                }
+            } while (opcion2 != 0);
             break;
         case 0:
             printf(">> Saliendo...\n");
@@ -109,22 +165,20 @@ void menuPrincipal()
         default:
             printf(">> Opción invalida. Intente de nuevo.\n");
         }
-    } while (opcion != 0);
+    } while (opc != 0);
 }
 
-
 // --- Operaciones de LSO
-
 
 // --- Operaciones de ABB
 
 // todos los eventos en listaEventos tienen la misma fecha, que se puede obtener de:
 // ------------- >    nodo->listaEventos->evento.fecha
 
-
 //------------------------------
 
-void comparacionEstructuras(NodoABB** raiz, NodoABB_F** raiz_f, LSOBB lista[], LSOBB_F lista_f[], int* totalLSOBB, int* totalLSOBB_F){
+void comparacionEstructuras(NodoABB **raiz, NodoABB_F **raiz_f, LSOBB lista[], LSOBB_F lista_f[], int *totalLSOBB, int *totalLSOBB_F)
+{
     int i = 0;
     // Limpiar Estructuras
     limpiarSublistasLSOBB_F(lista_f, *totalLSOBB_F);
@@ -138,15 +192,19 @@ void comparacionEstructuras(NodoABB** raiz, NodoABB_F** raiz_f, LSOBB lista[], L
     Lectura_Operaciones(raiz, raiz_f, lista, lista_f, totalLSOBB, totalLSOBB_F);
 }
 
-void limpiarSublistasLSOBB_F(LSOBB_F lista_f[], int total) {
-    for (int i = 0; i < total; i++) {
+void limpiarSublistasLSOBB_F(LSOBB_F lista_f[], int total)
+{
+    for (int i = 0; i < total; i++)
+    {
         liberarSublistaEventos(lista_f[i].listaEventos);
         lista_f[i].listaEventos = NULL;
     }
 }
 
-void limpiarSublistasABB_F(NodoABB_F* nodo) {
-    if (nodo == NULL) return;
+void limpiarSublistasABB_F(NodoABB_F *nodo)
+{
+    if (nodo == NULL)
+        return;
 
     limpiarSublistasABB_F(nodo->izq);
     limpiarSublistasABB_F(nodo->der);
@@ -155,47 +213,59 @@ void limpiarSublistasABB_F(NodoABB_F* nodo) {
     nodo->listaEventos = NULL;
 }
 
-void liberarSublistaEventos(NodoEvento* cabeza) {
-    NodoEvento* aux;
-    while (cabeza != NULL) {
+void liberarSublistaEventos(NodoEvento *cabeza)
+{
+    NodoEvento *aux;
+    while (cabeza != NULL)
+    {
         aux = cabeza;
         cabeza = cabeza->sig;
         free(aux);
     }
 }
 
-int Lectura_Operaciones(NodoABB** raiz, NodoABB_F** raiz_f, LSOBB lista[], LSOBB_F lista_f[], int* totalLSOBB, int* totalLSOBB_F) {
+int Lectura_Operaciones(NodoABB **raiz, NodoABB_F **raiz_f, LSOBB lista[], LSOBB_F lista_f[], int *totalLSOBB, int *totalLSOBB_F)
+{
     FILE *fp;
     int codigoOperador;
     Evento aux;
 
-    if ((fp = fopen("Operaciones.txt", "r")) == NULL) {
+    if ((fp = fopen("Operaciones.txt", "r")) == NULL)
+    {
         printf("Error al abrir el archivo de operaciones.\n");
         return 0;
     }
 
-    while (!feof(fp)) {
+    while (!feof(fp))
+    {
         fscanf(fp, "%d", &codigoOperador);
         fscanf(fp, " %[^\n]", aux.fecha); // fecha: formato AAAA-MM-DD
 
-        if (codigoOperador == 1 || codigoOperador == 2) {
+        if (codigoOperador == 1 || codigoOperador == 2)
+        {
             fscanf(fp, " %[^\n]", aux.evento);
             fscanf(fp, "%d", &aux.hora);
             fscanf(fp, " %[^\n]", aux.lugar);
 
-            if (codigoOperador == 1) { //ALTA
-            //    printf("[Alta] %04d-%02d-%02d %02dhs - %s @ %s\n",
-            //           auxFecha.anio, auxFecha.mes, auxFecha.dia,
-            //           aux.hora, aux.evento, aux.lugar);
-            } else { //BAJA
-            //    printf("[Baja] %04d-%02d-%02d %02dhs - %s @ %s\n",
-            //           auxFecha.anio, auxFecha.mes, auxFecha.dia,
-            //           aux.hora, aux.evento, aux.lugar);
+            if (codigoOperador == 1)
+            { // ALTA
+                //    printf("[Alta] %04d-%02d-%02d %02dhs - %s @ %s\n",
+                //           auxFecha.anio, auxFecha.mes, auxFecha.dia,
+                //           aux.hora, aux.evento, aux.lugar);
             }
-
-        } else if (codigoOperador == 3) {
+            else
+            { // BAJA
+                //    printf("[Baja] %04d-%02d-%02d %02dhs - %s @ %s\n",
+                //           auxFecha.anio, auxFecha.mes, auxFecha.dia,
+                //           aux.hora, aux.evento, aux.lugar);
+            }
+        }
+        else if (codigoOperador == 3)
+        {
             // Evocar en estructuras
-        } else {
+        }
+        else
+        {
             printf(">> Código no reconocido: %d\n", codigoOperador);
         }
     }
@@ -205,23 +275,28 @@ int Lectura_Operaciones(NodoABB** raiz, NodoABB_F** raiz_f, LSOBB lista[], LSOBB
 }
 
 /**RETORNA 1 SI SON IGUALES 0 SI NO*/
-int compararEventos(Evento evento1, Evento evento2){
-    if((strcasecmp(evento1.evento,evento2.evento))==0 && evento1.hora==evento2.hora && (strcasecmp(evento1.fecha,evento2.fecha))==0 && (strcasecmp(evento1.lugar,evento2.lugar))==0){
+int compararEventos(Evento evento1, Evento evento2)
+{
+    if ((strcasecmp(evento1.evento, evento2.evento)) == 0 && evento1.hora == evento2.hora && (strcasecmp(evento1.fecha, evento2.fecha)) == 0 && (strcasecmp(evento1.lugar, evento2.lugar)) == 0)
+    {
         return 1;
     }
-    else{
+    else
+    {
         return 0;
     }
 }
 
-void mostrarEvento(Evento e){
+void mostrarEvento(Evento e)
+{
     printf("Evento: %s\n", e.evento);
     printf("Fecha: %s\n", e.fecha);
     printf("Hora: %d\n", e.hora);
     printf("Lugar: %s\n", e.lugar);
 }
 
-void cuadroComp(void){
+void cuadroComp(void)
+{
     system("cls");
     system("color 03");
     printf("##======================================================================================================##\n");
@@ -240,7 +315,7 @@ void cuadroComp(void){
     printf("|| MAX. BAJA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
 
     printf("|| MED. BAJA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
-    //AGREGAR CONTROLES NECESARIOS Y VARIABLES
+    // AGREGAR CONTROLES NECESARIOS Y VARIABLES
     printf("||============================================================================||\n");
     system("pause");
     system("cls");
