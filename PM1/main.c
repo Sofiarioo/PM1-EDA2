@@ -5,11 +5,13 @@
 #define MAX_EVENTOS 744 //24 eventos al dia * 31 dias
 #define MAX_EVENTOS_FECHA 24 // máximo 1 evento por hora
 
-///pedo
-
 // -------------------------
 // Estructuras
 // -------------------------
+typedef struct {
+    int max, sumatoria, cantidad;
+} Costos;
+
 typedef struct
 {
     char fecha[11]; //formato: AAAA-MM-DD
@@ -53,6 +55,12 @@ void menuAdministrarEstructuras();
 void comparacionEstructuras();
 
 // -------------------------
+
+Costos costosLSO = {0, 0, 0};
+Costos costosLSO_F = {0, 0, 0};
+Costos costosABB = {0, 0, 0};
+Costos costosABB_F = {0, 0, 0};
+
 int main()
 {
     menuPrincipal();
@@ -81,8 +89,7 @@ void menuPrincipal()
         switch (opcion)
         {
         case 1:
-            // comparacionEstructuras(NodoABB** raiz, NodoABB_F** raiz_f, LSOBB lista[], LSOBB_F lista_f[], int* totalLSOBB, int* totalLSOBB_F){
-            comparacionEstructuras(&raiz, &raiz_f,lista, lista_f,&cargadosLSO,&cargadosLSO_F);
+            comparacionEstructuras(&raiz, &raiz_f, lista, lista_f, &cargadosLSO, &cargadosLSO_F);
             break;
         case 2:
             printf(">> Administracion de estructura (a implementar)\n");
@@ -112,18 +119,44 @@ void menuPrincipal()
 void comparacionEstructuras(NodoABB** raiz, NodoABB_F** raiz_f, LSOBB lista[], LSOBB_F lista_f[], int* totalLSOBB, int* totalLSOBB_F){
     int i = 0;
     // Limpiar Estructuras
-    while(lista_f[i].listaEventos != NULL && i < *totalLSOBB_F) {
-        lista_f[i].listaEventos = NULL;
-        i++;
-    }
+    limpiarSublistasLSOBB_F(lista_f, *totalLSOBB_F);
+    limpiarSublistasABB_F(*raiz_f);
 
     *raiz = NULL;
     *raiz_f = NULL;
     *totalLSOBB = 0;
     *totalLSOBB_F = 0;
+
+    Lectura_Operaciones(raiz, raiz_f, lista, lista_f, totalLSOBB, totalLSOBB_F);
 }
 
-int LecturaOperaciones() {
+void limpiarSublistasLSOBB_F(LSOBB_F lista_f[], int total) {
+    for (int i = 0; i < total; i++) {
+        liberarSublistaEventos(lista_f[i].listaEventos);
+        lista_f[i].listaEventos = NULL;
+    }
+}
+
+void limpiarSublistasABB_F(NodoABB_F* nodo) {
+    if (nodo == NULL) return;
+
+    limpiarSublistasABB_F(nodo->izq);
+    limpiarSublistasABB_F(nodo->der);
+
+    liberarSublistaEventos(nodo->listaEventos);
+    nodo->listaEventos = NULL;
+}
+
+void liberarSublistaEventos(NodoEvento* cabeza) {
+    NodoEvento* aux;
+    while (cabeza != NULL) {
+        aux = cabeza;
+        cabeza = cabeza->sig;
+        free(aux);
+    }
+}
+
+int Lectura_Operaciones(NodoABB** raiz, NodoABB_F** raiz_f, LSOBB lista[], LSOBB_F lista_f[], int* totalLSOBB, int* totalLSOBB_F) {
     FILE *fp;
     int codigoOperador;
     Evento aux;
