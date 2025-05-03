@@ -101,7 +101,7 @@ void menuPrincipal()
             break;
         case 2:
             printf(">> Administracion de estructura (a implementar)\n");
-           // menuAdministrarEstructuras();
+            menuAdministrarEstructuras();
             break;
         case 0:
             printf(">> Saliendo...\n");
@@ -203,6 +203,49 @@ int Lectura_Operaciones(NodoABB** raiz, NodoABB_F** raiz_f, LSOBB lista[], LSOBB
     fclose(fp);
     return 1;
 }
+
+/**RETORNA 1 SI SON IGUALES 0 SI NO*/
+int compararEventos(Evento evento1, Evento evento2){
+    if((strcasecmp(evento1.evento,evento2.evento))==0 && evento1.hora==evento2.hora && (strcasecmp(evento1.fecha,evento2.fecha))==0 && (strcasecmp(evento1.lugar,evento2.lugar))==0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+void mostrarEvento(Evento e){
+    printf("Evento: %s\n", e.evento);
+    printf("Fecha: %s\n", e.fecha);
+    printf("Hora: %d\n", e.hora);
+    printf("Lugar: %s\n", e.lugar);
+}
+
+void cuadroComp(void){
+    system("cls");
+    system("color 03");
+    printf("##======================================================================================================##\n");
+    printf("||                                    COMPARACION DE ESTRUCTURAS                                        ||\n");
+    printf("##======================================================================================================##\n");
+    printf("||                      ||  COSTOS LSOBB   ||   COSTOS LSOBB_F   ||   COSTOS ABB    ||   COSTOS ABB_F   ||\n");
+    printf("##======================================================================================================##\n");
+    printf("|| MAX. EVOC. EX.       ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+
+    printf("|| MED. EVOC. EX.       ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+
+    printf("|| MAX. ALTA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+
+    printf("|| MED. ALTA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+
+    printf("|| MAX. BAJA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+
+    printf("|| MED. BAJA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+    //AGREGAR CONTROLES NECESARIOS Y VARIABLES
+    printf("||============================================================================||\n");
+    system("pause");
+    system("cls");
+}
+
 
 /**RETORNA 1 SI SON IGUALES 0 SI NO*/
 int compararEventos(Evento evento1, Evento evento2){
