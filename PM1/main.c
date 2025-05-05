@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_EVENTOS 744      // 24 eventos al dia * 31 dias
-#define MAX_EVENTOS_FECHA 24 // máximo 1 evento por hora
+#define MAX_EVENTOS 744         // 24 eventos al dia * 31 dias
+#define MAX_EVENTOS_FORZANDO 31 // maximo 31 dias al mes
+#define MAX_EVENTOS_FECHA 24    // máximo 1 evento por hora
 
 // -------------------------
 // Estructuras
@@ -15,7 +16,6 @@ typedef struct
 
 typedef struct
 {
-    char fecha[11]; // formato: AAAA-MM-DD
     int hora;
     char evento[81];
     char lugar[81];
@@ -31,18 +31,21 @@ typedef struct
 // LSO sin forzar dp. funcional
 typedef struct
 {
+    char fecha[11]; // formato: AAAA-MM-DD
     Evento evento;
 } LSOBB;
 
 // LSO forzando dp. funcional
 typedef struct
 {
+    char fecha[11]; // formato: AAAA-MM-DD
     NodoEvento *listaEventos;
 } LSOBB_F;
 
-// ABB sin dependencia funcional: múltiples eventos por fecha
+// ABB sin dependencia funcional: un evento por fecha (se puede repetir fecha)
 typedef struct NodoABB
 {
+    char fecha[11]; // formato: AAAA-MM-DD
     Evento evento;
     struct NodoABB *izq, *der;
 } NodoABB;
@@ -50,6 +53,7 @@ typedef struct NodoABB
 // ABB-F (forzando dependencia funcional): un conjunto de eventos por fecha
 typedef struct NodoABB_F
 {
+    char fecha[11]; // formato: AAAA-MM-DD
     NodoEvento *listaEventos;
     struct NodoABB_F *izq, *der;
 } NodoABB_F;
@@ -57,7 +61,6 @@ typedef struct NodoABB_F
 // Prototipos
 void menuPrincipal();
 int Lectura_Operaciones();
-void menuAdministrarEstructuras();
 void comparacionEstructuras();
 
 // -------------------------
@@ -94,11 +97,11 @@ void menuPrincipal()
     do
     {
         system("cls");
-        printf("\n=== Agenda Mensual ===\n");
+        printf("=== Agenda Mensual ===\n");
         printf("1. Comparacion de Estructuras\n");
         printf("2. Administrar Estructuras\n");
         printf("0. Salir\n");
-        printf("Seleccione una opcion: \n");
+        printf("Seleccione una opcion: ");
         scanf("%d", &opc);
 
         switch (opc)
@@ -113,41 +116,42 @@ void menuPrincipal()
                 printf("1. Mostrar Estructura.\n");
                 printf("2. Evocar.\n");
                 printf("0. Volver\n");
-                printf("Seleccione una opcion: \n");
+                printf("Seleccione una opcion: ");
                 scanf("%d", &opcion2);
 
                 switch (opcion2)
                 {
                 case 1:
-                do {
-                    printf("1. Mostrar LSO sin forzar dependencia.\n");
-                    printf("2. Mostrar LSO forzando dependencia.\n");
-                    printf("3. Mostrar ABB sin forzar dependencia..\n");
-                    printf("4. Mostrar ABB forzando dependencia.\n");
-                    printf("0. Volver\n");
-                    printf("Seleccione una opcion: \n");
-                    scanf("%d", &opcion);
-                    switch (opcion)
+                    do
                     {
-                    case 1:
-                        // mostrarLSOBB();
-                        break;
-                    case 2:
-                        // mostrarLSOBB_F();
-                        break;
-                    case 3:
-                        // mostrarABB();
-                        break;
-                    case 4:
-                        // mostrarABB_F();
-                        break;
-                    case 0:
-                        printf(">> Volviendo...\n");
-                        break;
-                    default:
-                        printf(">> Opción invalida. Intente de nuevo.\n");
-                    }
-                } while (opcion != 0);    
+                        printf("\n1. Mostrar LSO sin forzar dependencia.\n");
+                        printf("2. Mostrar LSO forzando dependencia.\n");
+                        printf("3. Mostrar ABB sin forzar dependencia..\n");
+                        printf("4. Mostrar ABB forzando dependencia.\n");
+                        printf("0. Volver\n");
+                        printf("Seleccione una opcion: ");
+                        scanf("%d", &opcion);
+                        switch (opcion)
+                        {
+                        case 1:
+                            // mostrarLSOBB();
+                            break;
+                        case 2:
+                            // mostrarLSOBB_F();
+                            break;
+                        case 3:
+                            // mostrarABB();
+                            break;
+                        case 4:
+                            // mostrarABB_F();
+                            break;
+                        case 0:
+                            printf(">> Volviendo...\n");
+                            break;
+                        default:
+                            printf(">> Opción invalida. Intente de nuevo.\n");
+                        }
+                    } while (opcion != 0);
                 case 2:
                     // EVOCAR
                     break;
@@ -168,12 +172,63 @@ void menuPrincipal()
     } while (opc != 0);
 }
 
-// --- Operaciones de LSO
+// --- Operaciones de LSO sin forzar dependencia ---
+int inicioLSOBB(LSOBB lista[], char fechaBuscada[], int total)
+{
+    int inf = 0;
+    int sup = total - 1;
+    int medio;
+
+    while (inf <= sup)
+    {
+        medio = (inf + sup + 1) / 2; // (REVISAR TECHO O PISO DE LA DIVISIÓN. Sumando +1 deberia quedar como techo, ya que C redondea al piso)
+        if (strcmp(lista[medio].fecha, fechaBuscada) < 0)
+        {
+            inf = medio + 1; // Buscamos a la derecha
+        }
+        else
+        {
+            sup = medio - 1; // Buscamos a la izquierda
+        }
+    }
+    return inf; //devolvemos el testigo, deberia ser donde comience la primer fecha
+}
+
+int hayMasLSOBB(LSOBB lista[], char fechaBuscada[], int pos, int total)
+{
+    if (pos < total && strcmp(lista[pos].fecha, fechaBuscada) == 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+// Localizar retorna: 1 si el evento ya existe en la fecha dada, 0 si no existe el evento en la fecha dada.
+int localizarLSOBB(LSOBB lista[], LSOBB evBuscado, int total, int *pos)
+{
+    *pos = inicioLSOBB(lista, evBuscado.fecha, total);
+    int posAux = *pos;
+
+    while (hayMasLSOBB(lista, evBuscado.fecha, posAux, total))
+    {
+        if (compararEventos(evBuscado.evento, lista[posAux].evento))
+        {
+            return 1; // ya existe el mismo evento en esa fecha.
+        }
+        posAux++; // deme otro
+    }
+
+    return 0; // el evento no existe, se insertará en lista[pos]
+}
+
+// --- Operaciones LSO FORZANDO dependencia ---
 
 // --- Operaciones de ABB
 
 // todos los eventos en listaEventos tienen la misma fecha, que se puede obtener de:
-// ------------- >    nodo->listaEventos->evento.fecha
+// ------------- >    nodo.fecha
+// y se puede acceder a un evento en particular asi
+// ------------->    nodo->listaEventos->evento (->sig , .lugar , .hora , .evento)
 
 //------------------------------
 
@@ -229,6 +284,7 @@ int Lectura_Operaciones(NodoABB **raiz, NodoABB_F **raiz_f, LSOBB lista[], LSOBB
     FILE *fp;
     int codigoOperador;
     Evento aux;
+    char fechaAux[11];
 
     if ((fp = fopen("Operaciones.txt", "r")) == NULL)
     {
@@ -239,7 +295,7 @@ int Lectura_Operaciones(NodoABB **raiz, NodoABB_F **raiz_f, LSOBB lista[], LSOBB
     while (!feof(fp))
     {
         fscanf(fp, "%d", &codigoOperador);
-        fscanf(fp, " %[^\n]", aux.fecha); // fecha: formato AAAA-MM-DD
+        fscanf(fp, " %[^\n]", fechaAux); // fecha: formato AAAA-MM-DD
 
         if (codigoOperador == 1 || codigoOperador == 2)
         {
@@ -249,15 +305,9 @@ int Lectura_Operaciones(NodoABB **raiz, NodoABB_F **raiz_f, LSOBB lista[], LSOBB
 
             if (codigoOperador == 1)
             { // ALTA
-                //    printf("[Alta] %04d-%02d-%02d %02dhs - %s @ %s\n",
-                //           auxFecha.anio, auxFecha.mes, auxFecha.dia,
-                //           aux.hora, aux.evento, aux.lugar);
             }
             else
             { // BAJA
-                //    printf("[Baja] %04d-%02d-%02d %02dhs - %s @ %s\n",
-                //           auxFecha.anio, auxFecha.mes, auxFecha.dia,
-                //           aux.hora, aux.evento, aux.lugar);
             }
         }
         else if (codigoOperador == 3)
@@ -277,7 +327,7 @@ int Lectura_Operaciones(NodoABB **raiz, NodoABB_F **raiz_f, LSOBB lista[], LSOBB
 /**RETORNA 1 SI SON IGUALES 0 SI NO*/
 int compararEventos(Evento evento1, Evento evento2)
 {
-    if ((strcasecmp(evento1.evento, evento2.evento)) == 0 && evento1.hora == evento2.hora && (strcasecmp(evento1.fecha, evento2.fecha)) == 0 && (strcasecmp(evento1.lugar, evento2.lugar)) == 0)
+    if ((strcasecmp(evento1.evento, evento2.evento)) == 0 && evento1.hora == evento2.hora && (strcasecmp(evento1.lugar, evento2.lugar)) == 0)
     {
         return 1;
     }
@@ -290,7 +340,6 @@ int compararEventos(Evento evento1, Evento evento2)
 void mostrarEvento(Evento e)
 {
     printf("Evento: %s\n", e.evento);
-    printf("Fecha: %s\n", e.fecha);
     printf("Hora: %d\n", e.hora);
     printf("Lugar: %s\n", e.lugar);
 }
