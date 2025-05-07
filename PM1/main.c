@@ -186,7 +186,7 @@ int inicioLSOBB(LSOBB lista[], char fechaBuscada[], int total)
     //system("pause");
     while (inf <= sup)
     {
-        medio = (inf + sup + 1) / 2; // (REVISAR TECHO O PISO DE LA DIVISIÓN. Sumando +1 deberia quedar como techo, ya que C redondea al piso)
+        medio = (inf + sup + 1) / 2; //  (Sumando +1 para obtener techo, ya que C redondea al piso)
         if (strcmp(lista[medio].fecha, fechaBuscada) < 0)
         {
             inf = medio + 1; // Buscamos a la derecha
@@ -291,7 +291,6 @@ void mostrarLSOBB(LSOBB lista[], int cargados){
     for(i=0; i<cargados; i+=5){
         for(mod=i; mod<i+5 && mod<cargados; mod++){
             printf("Fecha %s:\n", lista[mod].fecha);
-            printf("Evento:\n");
             mostrarEvento(lista[mod].evento);
             printf("-------------------------------------------------\n");
         }
@@ -299,9 +298,11 @@ void mostrarLSOBB(LSOBB lista[], int cargados){
     }
 }
 
+
 // ----
 // --- Operaciones LSO FORZANDO dependencia ---
 // ----
+
 int inicioLSOBB_F(LSOBB_F lista[], char fechaBuscada[], int total)
 {
     int inf = 0;
@@ -310,7 +311,7 @@ int inicioLSOBB_F(LSOBB_F lista[], char fechaBuscada[], int total)
 
     while (inf <= sup)
     {
-        medio = (inf + sup + 1) / 2; // (REVISAR TECHO O PISO DE LA DIVISIÓN. Sumando +1 deberia quedar como techo, ya que C redondea al piso)
+        medio = (inf + sup + 1) / 2; // (Sumando +1 para obtener techo, ya que C redondea al piso)
         if (strcmp(lista[medio].fecha, fechaBuscada) < 0)
         {
             inf = medio + 1; // Buscamos a la derecha
@@ -320,7 +321,7 @@ int inicioLSOBB_F(LSOBB_F lista[], char fechaBuscada[], int total)
             sup = medio - 1; // Buscamos a la izquierda
         }
     }
-    return inf; //devolvemos el testigo, deberia ser donde comience la primer fecha
+    return inf; //devolvemos el testigo
 }
 
 int hayMasLSOBB_F(NodoEvento *listaEventos)
@@ -331,32 +332,111 @@ int hayMasLSOBB_F(NodoEvento *listaEventos)
     }
     return 0;
 }
-/*
-// Localizar retorna: 1 si hay un evento en la fecha dada a esa hora, 0 si la fecha está y no hay evento a esa hora, -1 si NO esta la fecha.
-int localizarLSOBB_F(LSOBB_F lista[], LSOBB evBuscado, int total, int* pos, NodoEvento* cur, NodoEvento* ant)
-{
-    *pos = inicioLSOBB_F(lista, evBuscado.fecha, total);
-    int posAux = *pos;
 
-    if(posAux >= total || (strcmp(lista[posAux].fecha, evBuscado.fecha) != 0)){
-        return -1;  //No existe la fecha en la lista (ALTA de FECHA)
+// Localizar retorna: 1 si hay un evento en la fecha dada a esa hora, 0 si la fecha está y no hay evento a esa hora, -1 si NO esta la fecha.
+int localizarLSOBB_F(LSOBB_F lista[], char fechaB[], Evento evBuscado, int total, int* pos, NodoEvento** cur, NodoEvento** ant)
+{
+    *pos = inicioLSOBB_F(lista, fechaB, total);
+
+    if(*pos >= total || (strcmp(lista[*pos].fecha, fechaB) != 0)){
+        return -1;  //No existe la fecha en la lista (ALTA de FECHA en lista[pos])
     }
 
-    cur = lista[posAux].listaEventos;           //cur apunta a la lvo de la fecha buscada
-    ant = cur;
+    *cur = lista[*pos].listaEventos;           //cur apunta a la lvo de la fecha buscada
+    *ant = *cur;
 
-    while (hayMasLSOBB_F(cur))
+    while (hayMasLSOBB_F(*cur))
     {
-        if(cur->evento.hora == evBuscado.evento.hora){
+        if((*cur)->evento.hora == evBuscado.hora){
             return 1;   // ya existe un evento a esa hora, estará apuntado por cur para darlo de baja eventualmente
         }
-        ant = cur;
-        cur = cur->sig; //deme otro
+        *ant = *cur;
+        *cur = (*cur)->sig; //deme otro
     }
 
     return 0; // no existe evento en esa hora, se insertará en lsobb_f[pos]->listaEventos ALTA
 }
-*/
+
+int altaLSOBB_F(LSOBB_F lsobb_F[], char fecha[], Evento ev, int *cargadosLSO_F){
+    if(*cargadosLSO_F==MAX_EVENTOS_FORZANDO-1){
+        return -1;                  // lista llena
+    }    
+
+    int pos=0;
+    NodoEvento* cur = NULL;
+    NodoEvento* ant = NULL;
+    
+    int resultadoLocalizar = localizarLSOBB_F(lsobb_F, fecha, ev, *cargadosLSO_F, &pos, &cur, &ant);
+    if (resultadoLocalizar==1){
+        return 0; //ya hay un evento a esa hora en la lista
+    }
+    
+    if (resultadoLocalizar == -1){      //caso: Dar de alta FECHA y evento
+        int i;
+        for(i=*cargadosLSO_F-1; i>=pos; i--){
+            lsobb_F[i+1]=lsobb_F[i];
+        }
+        strcpy(lsobb_F[pos].fecha,fecha); 
+        lsobb_F[pos].listaEventos = crearNodoLVO(ev);
+        *cargadosLSO_F+=1;        
+    } 
+    else                //caso: Dar de alta un evento en una fecha ya existente
+    {
+        NodoEvento* nuevo = crearNodoLVO(ev);
+        nuevo->sig = lsobb_F[pos].listaEventos;
+        lsobb_F[pos].listaEventos = nuevo;
+    }
+
+    return 1;
+}
+
+//Retorna 1 si se pudo eliminar, 0 si no se encontró el elemento a eliminar.
+int eliminarLSOBB_F(LSOBB_F lsobb_F[], char fecha[], Evento ev, int *cargadosLSO_F){
+    int pos = 0;
+    NodoEvento* cur = NULL;
+    NodoEvento* ant = NULL;
+    if(localizarLSOBB_F(lsobb_F, fecha, ev, *cargadosLSO_F, &pos, &cur, &ant) == 1){
+        if(compararEventos(ev,cur->evento)==1){
+            if(ant != cur){ //si son diferentes, hay mas de 1 evento en la lista vinculada
+                ant->sig = cur->sig;
+                free((void*)cur);
+            }
+            else        //hay que dar de baja la fecha, ya que no tiene mas eventos asociados
+            {
+                free((void*)cur);
+                int i=pos;
+                for(i; i<(*cargadosLSO_F)-1; i++){
+                    lsobb_F[i]=lsobb_F[i+1];
+                }
+                *cargadosLSO_F-=1;
+            }
+            return 1; //se elimino con exito
+        }
+    }
+    return 0; //el elemento no esta en la lista
+}
+
+NodoEvento* evocacionLSOBB_F(LSOBB_F lsobb_F[], char fechaBuscada[], int cargadosLSO_F) {
+    int pos = inicioLSOBB_F(lsobb_F, fechaBuscada, cargadosLSO_F);
+    return lsobb_F[pos].listaEventos;
+}
+
+void mostrarLSOBB_F(LSOBB_F lista[], int cargados){
+    int i;
+    //MUESTRA TODOS LOS EVENTOS DE UNA FECHA   
+    printf("LISTA SECUENCIAL ORDENADA CON BUSQUEDA BINARIA FORZANDO DEPENDENCIA FUNCIONAL\n");
+    printf("--------------AGENDA DE EVENTOS--------------\n");
+    for(i=0; i<cargados; i++){
+        printf("Fecha %s:\n", lista[i].fecha);
+        NodoEvento* cur = lista[i].listaEventos;
+        do{
+            mostrarEvento(cur->evento);
+            printf("-------------------------------------------------\n");
+            cur = cur->sig;        
+        }while(hayMasLSOBB_F(cur));
+        system("pause");
+    }
+}
 
 // --- Operaciones de ABB
 
@@ -444,22 +524,28 @@ int Lectura_Operaciones(NodoABB **raiz, NodoABB_F **raiz_f, LSOBB lista[], LSOBB
 
             if (codigoOperador == 1)
             { // ALTA
-                altaLSOBB(lista,evAux,totalLSOBB);
+                /*altaLSOBB(lista,evAux,totalLSOBB);
                 printf("ALTA. Cargados: %d\n",*totalLSOBB);
-                //system("pause");
+                //*/
+
+                system("pause");
             }
             else
             { // BAJA
-                eliminarLSOBB(lista,evAux,totalLSOBB);
+                /*eliminarLSOBB(lista,evAux,totalLSOBB);
                 printf("BAJA. Cargados: %d\n",*totalLSOBB);
-                //system("pause");
+                */
+
+                system("pause");
             }
         }
         else if (codigoOperador == 3)
         {
-            // Evocar en estructuras
+            /* Evocar en estructuras
             evocacionLSOBB(lista,fechaAux,*totalLSOBB);
-            printf("EVOCACION.");
+            printf("EVOCACION.");*/
+
+            system("pause");
         }
         else
         {
