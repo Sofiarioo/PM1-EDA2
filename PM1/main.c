@@ -22,21 +22,21 @@ typedef struct
 } Evento;
 
 // LVO aux
-typedef struct
+typedef struct NodoEvento
 {
     Evento evento;
     struct NodoEvento *sig;
 } NodoEvento;
 
 // LSO sin forzar dp. funcional
-typedef struct
+typedef struct LSOBB
 {
     char fecha[11]; // formato: AAAA-MM-DD
     Evento evento;
 } LSOBB;
 
 // LSO forzando dp. funcional
-typedef struct
+typedef struct LSOBB_F
 {
     char fecha[11]; // formato: AAAA-MM-DD
     NodoEvento *listaEventos;
@@ -64,6 +64,9 @@ int Lectura_Operaciones();
 void comparacionEstructuras();
 NodoEvento* crearNodoLVO(Evento e);
 void mostrarLSOBB();
+void mostrarLSOBB_F();
+int compararEventos();
+void mostrarEvento();
 
 // -------------------------
 
@@ -111,6 +114,7 @@ void menuPrincipal()
         case 1:
             comparacionEstructuras(&raiz, &raiz_f, lista, lista_f, &cargadosLSO, &cargadosLSO_F);
             printf("Cargados: %d\n",cargadosLSO);
+            printf("Cargados: %d\n",cargadosLSO_F);
             system("pause");
             break;
         case 2:
@@ -141,7 +145,7 @@ void menuPrincipal()
                             mostrarLSOBB(lista,cargadosLSO);
                             break;
                         case 2:
-                            // mostrarLSOBB_F();
+                            mostrarLSOBB_F(lista_f,cargadosLSO_F);
                             break;
                         case 3:
                             // mostrarABB();
@@ -524,28 +528,27 @@ int Lectura_Operaciones(NodoABB **raiz, NodoABB_F **raiz_f, LSOBB lista[], LSOBB
 
             if (codigoOperador == 1)
             { // ALTA
-                /*altaLSOBB(lista,evAux,totalLSOBB);
-                printf("ALTA. Cargados: %d\n",*totalLSOBB);
-                //*/
+                altaLSOBB(lista,evAux,totalLSOBB);
+                printf("ALTA. Cargados: %d\n",*totalLSOBB);                
 
-                system("pause");
+                altaLSOBB_F(lista_f,fechaAux,aux,totalLSOBB_F);
+                printf("ALTA. Cargados: %d\n",*totalLSOBB_F);
             }
             else
             { // BAJA
-                /*eliminarLSOBB(lista,evAux,totalLSOBB);
-                printf("BAJA. Cargados: %d\n",*totalLSOBB);
-                */
+                eliminarLSOBB(lista,evAux,totalLSOBB);
+                printf("BAJA. Cargados: %d\n",*totalLSOBB);                
 
-                system("pause");
+                //eliminarLSOBB_F(lista_f,fechaAux,aux,totalLSOBB_F);
+                printf("BAJA. Cargados: %d\n",*totalLSOBB_F);
             }
         }
         else if (codigoOperador == 3)
         {
-            /* Evocar en estructuras
+            // Evocar en estructuras
             evocacionLSOBB(lista,fechaAux,*totalLSOBB);
-            printf("EVOCACION.");*/
 
-            system("pause");
+            evocacionLSOBB_F(lista,fechaAux,*totalLSOBB_F);
         }
         else
         {
