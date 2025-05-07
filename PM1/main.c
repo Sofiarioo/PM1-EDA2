@@ -70,17 +70,6 @@ typedef struct ABB_F{
     NodoABB_F* ant;
 }ABB_F;
 
-typedef struct NodoPila
-{
-    NodoABB* dato;
-    struct NodoPila *sig;
-} NodoPila;
-
-typedef struct Pila
-{
-    NodoPila *tope;
-} Pila;
-
 // Prototipos
 void menuPrincipal();
 int Lectura_Operaciones();
@@ -147,8 +136,15 @@ void menuPrincipal()
         {
         case 1:
             comparacionEstructuras(&arbol, &arbol_f, lista, lista_f, &cargadosLSO, &cargadosLSO_F, &cargadosABB);
-            printf("Cargados: %d\n",cargadosLSO);
-            printf("Cargados: %d\n",cargadosLSO_F);
+            printf("Cargados lso: %d\n",cargadosLSO);
+            printf("Cargados lso_f: %d\n",cargadosLSO_F);
+            printf("Cargados abb: %d\n",cargadosABB);
+            printf("Raiz: %s\n", arbol.raiz->fecha);
+             if (arbol.raiz->izq) 
+                printf("Raiz->izq: %s\n", arbol.raiz->izq->fecha);
+             if (arbol.raiz->der) 
+                printf("Raiz->der: %s\n", arbol.raiz->der->fecha);
+
             system("pause");
             break;
         case 2:
@@ -182,7 +178,10 @@ void menuPrincipal()
                             mostrarLSOBB_F(lista_f,cargadosLSO_F);
                             break;
                         case 3:
-                            // mostrarABB();
+                            system("cls");
+                            printf("ARBOL BINARIO DE BUSQUEDA SIN FORZAR DEPENDENCIA FUNCIONAL\n");
+                            printf("--------------AGENDA DE EVENTOS--------------\n");
+                            mostrarABBPreorden(arbol.raiz);
                             break;
                         case 4:
                             // mostrarABB_F();
@@ -220,8 +219,6 @@ int inicioLSOBB(LSOBB lista[], char fechaBuscada[], int total)
     int inf = 0;
     int sup = total - 1;
     int medio;
-    printf("INICIO BB li: %d, ls: %d\n", inf,sup);
-    //system("pause");
     while (inf <= sup)
     {
         medio = (inf + sup + 1) / 2; //  (Sumando +1 para obtener techo, ya que C redondea al piso)
@@ -294,8 +291,6 @@ int altaLSOBB(LSOBB lsobb[], LSOBB elem, int *cargadosLSO){
     if ((localizarLSOBB(lsobb, elem, *cargadosLSO, &pos))==1){
         return 0; //ya hay un evento a esa hora en la lista
     }
-            printf("pos: %d\n", pos);
-            //system("pause");
     int i;
     for(i=*cargadosLSO-1; i>=pos; i--){
         lsobb[i+1]=lsobb[i];
@@ -504,12 +499,13 @@ int inicioABB(ABB *arbol, char fecha[]){
     while(arbol->cur != NULL){
         if(strcmp((arbol->cur)->fecha,fecha)!=0){
             arbol->ant = arbol->cur; //actualizo el cursor del anterior
-            if(strcmp((arbol->cur)->fecha,fecha)<=0){
-                arbol->cur = (arbol->cur)->izq;
+
+            if(strcmp((arbol->cur)->fecha, fecha) >= 0){
+                arbol->cur = (arbol->cur)->izq;  // menor o igual → izquierda
             }
             else{
-                arbol->cur = (arbol->cur)->der;
-            }
+                arbol->cur = (arbol->cur)->der;  // mayor → derecha
+            }            
         }
         else
         {
@@ -522,8 +518,8 @@ int inicioABB(ABB *arbol, char fecha[]){
     return 1; // se encontro la primer fecha
 }
 
-int hayMasABB(ABB *arbol, char fechaBuscada[]){
-    if(arbol->cur != NULL && strcmp(arbol->cur->fecha,fechaBuscada)){
+int hayMasABB(ABB *arbol, char fechaBuscada[]){    
+    if(arbol->cur != NULL && strcmp(arbol->cur->fecha,fechaBuscada)==0){
         return 1;
     }
     return 0;
@@ -549,7 +545,8 @@ int localizarABB(ABB *arbol, char fecha[], Evento ev){
 //RETORNA 1 SI TUVO EXITO, 0 SI YA EXISTIA EVENTO A ESA HORA.
 int altaABB(ABB* arbol, char fecha[], Evento evento, int *cantCargadosABB){
     if(arbol->raiz == NULL){                        //caso: alta de RAIZ
-        NodoABB* nodo = crearnodoABB(fecha,evento);
+        NodoABB* nodo = crearnodoABB(fecha,evento); 
+
         if (nodo != NULL){
             arbol->raiz = nodo;
             *cantCargadosABB+=1;
@@ -563,19 +560,16 @@ int altaABB(ABB* arbol, char fecha[], Evento evento, int *cantCargadosABB){
 
         NodoABB* nodo = crearnodoABB(fecha,evento);
 
-        if(strcmp((arbol->ant)->fecha, fecha) < 0){     //la fecha a insertar es mayor que donde fracaso localizar   
-            nodo->der = arbol->ant->der->der;
-            nodo->izq = arbol->ant->der->izq;         
-            (arbol->ant)->der = nodo;
+        if(strcmp((arbol->ant)->fecha, fecha) >= 0){     
+            (arbol->ant)->izq = nodo;  // menor o igual → izquierda
         }
-        else{                                          //la fecha a insertar es menor (o igual) que donde fracaso localizar
-            nodo->der = arbol->ant->izq->der;
-            nodo->izq = arbol->ant->izq->izq;
-            (arbol->ant)->izq = nodo;
+        else{                                          
+            (arbol->ant)->der = nodo;  // mayor → derecha
         }
-        *cantCargadosABB+=1;
-        return 1;  
+        
+        *cantCargadosABB+=1;          
     }
+    return 1;
 }
 
 //0 si no se encontro el elemento
@@ -670,59 +664,28 @@ int eliminarABB(ABB* arbol, char fecha[],Evento evento, int *cantCargadosABB){
     return 0;
 }
 
-void push(Pila* p, NodoABB* nodo)
-{
-    NodoPila* nuevoNodo = (NodoPila*) malloc(sizeof(NodoPila));
-    if (nuevoNodo == NULL){
-        printf("Error: No se pudo asignar memoria para el nuevo nodo\n");
-        exit(1);
+//PASAR LA RAIZ AL LLAMAR LA FUNCION
+void mostrarABBPreorden(NodoABB* nodo) {
+    if (nodo != NULL) {
+        printf("Fecha nodo: %s\n", nodo->fecha);
+        mostrarEvento(nodo->evento);
+
+        if (nodo->izq != NULL) {
+            printf("  Hijo izquierdo: %s\n", nodo->izq->fecha);
+        }
+        if (nodo->der != NULL) {
+            printf("  Hijo derecho: %s\n", nodo->der->fecha);
+        }
+        printf("-------------------------------------------------\n");
+
+        // Recorremos hijo izquierdo
+        mostrarABBPreorden(nodo->izq);
+
+        // Recorremos hijo derecho
+        mostrarABBPreorden(nodo->der);
     }
-    nuevoNodo->dato = nodo;
-    nuevoNodo->sig = p->tope;              // El siguiente del nuevo nodo es el antiguo tope
-    p->tope = nuevoNodo;
 }
 
-NodoABB* pop(Pila *pila){
-    if (pila->tope == NULL)
-    {
-        return NULL;
-    }
-    NodoABB* elemento = pila->tope->dato;
-    NodoPila* nodoAEliminar = pila->tope;
-    pila->tope = pila->tope->sig;
-    free(nodoAEliminar);
-    return elemento;
-}
-
-//Verificar que no sea nulo antes de llamar a la función
-void mostrarABB(ABB* arbol){
-    Pila pila;
-    pila.tope = NULL;
-    int contdenodo=0;
-    NodoABB* cursor=arbol->raiz;
-    push(&pila,cursor);
-    while((pila.tope)!=NULL)
-    {
-        contdenodo+=1;
-        printf("\n-----------------------------------------------------------------\n");
-        printf("   Fecha: %d\n", (cursor->fecha));
-        printf("   Evento: %s\n", (cursor->evento.evento));
-        printf("   Hora: %s\n", (cursor->evento.hora));
-        printf("   Lugar: %s\n", (cursor->evento.lugar));
-        if(cursor->der != NULL){
-            printf("   FECHA hijo derecho: %s\n", (cursor->der->fecha));
-            push(&pila, cursor->der);
-        }
-        if(cursor->izq != NULL){
-            printf("   FECHA hijo izquierdo: %s\n", (cursor->izq->fecha));
-            cursor=cursor->izq;
-        }
-        else{
-            cursor=pop(&pila);
-        }
-    }
-    system("pause");
-}
 
 // todos los eventos en listaEventos tienen la misma fecha, que se puede obtener de:
 // ------------- >    nodo.fecha
@@ -731,20 +694,6 @@ void mostrarABB(ABB* arbol){
 
 //------------------------------
 
-void comparacionEstructuras(NodoABB **raiz, NodoABB_F **raiz_f, LSOBB lista[], LSOBB_F lista_f[], int *totalLSOBB, int *totalLSOBB_F, int *totalABB)
-{
-    int i = 0;
-    // Limpiar Estructuras
-    //limpiarSublistasLSOBB_F(lista_f, *totalLSOBB_F);
-    //limpiarSublistasABB_F(*raiz_f);
-
-    *raiz = NULL;
-    *raiz_f = NULL;
-    *totalLSOBB = 0;
-    *totalLSOBB_F = 0;
-
-    Lectura_Operaciones(raiz, raiz_f, lista, lista_f, totalLSOBB, totalLSOBB_F, totalABB);
-}
 /*
 void limpiarSublistasLSOBB_F(LSOBB_F lista_f[], int total)
 {
@@ -783,9 +732,9 @@ int Lectura_Operaciones(ABB *arbol, ABB_F *arbol_f, LSOBB lista[], LSOBB_F lista
     FILE *fp;
     int codigoOperador;
     Evento aux;
-    char fechaAux[11];
+    char fechaAux[11]; 
 
-    if ((fp = fopen("Operaciones.txt", "r")) == NULL)
+    if ((fp = fopen("OperacionesACOTADO.txt", "r")) == NULL)
     {
         printf("Error al abrir el archivo de operaciones.\n");
         return 0;
@@ -809,16 +758,24 @@ int Lectura_Operaciones(ABB *arbol, ABB_F *arbol_f, LSOBB lista[], LSOBB_F lista
             if (codigoOperador == 1)
             { // ALTA
                 altaLSOBB(lista,evAux,totalLSOBB);                
+                printf("lso cargada\n"); system("pause");
+                altaLSOBB_F(lista_f,fechaAux,aux,totalLSOBB_F);         
+                printf("lsoF cargada\n"); system("pause");
 
-                altaLSOBB_F(lista_f,fechaAux,aux,totalLSOBB_F);
-
-               // altaABB(arbol,fechaAux,aux,totalABB);
+                altaABB(arbol,fechaAux,aux,totalABB);         
+                printf("abb cargado\n"); system("pause");
             }
             else
             { // BAJA
-                eliminarLSOBB(lista,evAux,totalLSOBB);              
+                printf("lso BAJA anterior\n"); system("pause"); 
+                eliminarLSOBB(lista,evAux,totalLSOBB);            
+                printf("lso BAJA\n"); system("pause");           
 
-                eliminarLSOBB_F(lista_f,fechaAux,aux,totalLSOBB_F);
+                eliminarLSOBB_F(lista_f,fechaAux,aux,totalLSOBB_F);         
+                printf("lsoF BAJA\n"); system("pause");
+
+                eliminarABB(arbol,fechaAux,aux,totalABB);         
+                printf("abb BAJA\n"); system("pause");
             }
         }
         else if (codigoOperador == 3)
@@ -837,6 +794,22 @@ int Lectura_Operaciones(ABB *arbol, ABB_F *arbol_f, LSOBB lista[], LSOBB_F lista
     fclose(fp);
     return 1;
 }
+
+void comparacionEstructuras(ABB *arbol, ABB_F *arbol_f, LSOBB lista[], LSOBB_F lista_f[], int *totalLSOBB, int *totalLSOBB_F, int *totalABB)
+{
+    int i = 0;
+    /* Limpiar Estructuras
+    limpiarSublistasLSOBB_F(lista_f, *totalLSOBB_F);
+    limpiarSublistasABB_F(*raiz_f);
+    *raiz = NULL;
+    *raiz_f = NULL;
+    *totalLSOBB = 0;
+    *totalLSOBB_F = 0;*/
+
+    Lectura_Operaciones(arbol, arbol_f, lista, lista_f, totalLSOBB, totalLSOBB_F, totalABB);
+}
+
+//--------------------------------------
 
 NodoEvento* crearNodoLVO(Evento e)
 {
