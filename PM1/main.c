@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_EVENTOS 744         // 24 eventos al dia * 31 dias
+#define MAX_EVENTOS 744        // 24 eventos al dia * 31 dias
 #define MAX_EVENTOS_FORZAND 31 // maximo 31 dias al mes
 
 // -------------------------
@@ -103,6 +103,9 @@ Costos cABB_Fevoc = {0, 0, 0};
 Costos cABB_Falta = {0, 0, 0};
 Costos cABB_Fbaja = {0, 0, 0};
 
+int nodosABBF;
+int eventosLSOBB_Fglobal;
+
 int main()
 {
     menuPrincipal();
@@ -112,7 +115,7 @@ int main()
 void menuPrincipal()
 {
     int opc, opcion, opcion2, opcion3;
-    
+
     char fechaev[11];
     NodoEvento *resultado = NULL;
 
@@ -149,9 +152,9 @@ void menuPrincipal()
         case 1:
             comparacionEstructuras(&arbol, &arbol_f, lista, lista_f, &cargadosLSO, &cargadosLSO_F, &cargadosABB, &cargadosABB_F);
             printf("Cargados lso: %d\n", cargadosLSO);
-            printf("Cargados lso_f: %d\n", cargadosLSO_F);
+            printf("\nCargados lso_f: %d\n, total eventos: %d\n\n", cargadosLSO_F, eventosLSOBB_Fglobal);
             printf("Cargados abb: %d\n", cargadosABB);
-            printf("Cargados abb_f: %d\n", cargadosABB_F);
+            printf("\nCargados abb_f: %d\nNodos: %d\n", cargadosABB_F, nodosABBF);
 
             system("pause");
             break;
@@ -198,7 +201,8 @@ void menuPrincipal()
                             mostrarABB_FPreorden(arbol_f.raiz);
                             break;
                         case 0:
-                            printf(">> Volviendo...\n"); opcion2=0;
+                            printf(">> Volviendo...\n");
+                            opcion2 = 0;
                             break;
                         default:
                             printf(">> Opción invalida. Intente de nuevo.\n");
@@ -228,7 +232,8 @@ void menuPrincipal()
                             printf("LSO SIN FORZAR DEPENDENCIA FUNCIONAL\n");
                             printf("--------------AGENDA DE EVENTOS--------------\n");
                             resultado = evocacionLSOBB(lista, fechaev, cargadosLSO);
-                            if(resultado != NULL){
+                            if (resultado != NULL)
+                            {
                                 printf("Fecha %s:\n", fechaev);
                                 while (resultado != NULL)
                                 {
@@ -236,8 +241,10 @@ void menuPrincipal()
                                     printf("-------------------------------------------------\n");
                                     resultado = resultado->sig;
                                 }
-                            } else{
-                                 printf("No hay eventos asociados a la fecha %s:\n",fechaev);
+                            }
+                            else
+                            {
+                                printf("No hay eventos asociados a la fecha %s:\n", fechaev);
                             }
                             system("pause");
                             break;
@@ -246,7 +253,8 @@ void menuPrincipal()
                             printf("LSO FORZANDO DEPENDENCIA FUNCIONAL\n");
                             printf("--------------AGENDA DE EVENTOS--------------\n");
                             resultado = evocacionLSOBB_F(lista_f, fechaev, cargadosLSO_F);
-                            if(resultado != NULL){
+                            if (resultado != NULL)
+                            {
                                 printf("Fecha %s:\n", fechaev);
                                 while (resultado != NULL)
                                 {
@@ -254,8 +262,10 @@ void menuPrincipal()
                                     printf("-------------------------------------------------\n");
                                     resultado = resultado->sig;
                                 }
-                            } else{
-                                 printf("No hay eventos asociados a la fecha %s:\n",fechaev);
+                            }
+                            else
+                            {
+                                printf("No hay eventos asociados a la fecha %s:\n", fechaev);
                             }
                             system("pause");
                             break;
@@ -264,7 +274,8 @@ void menuPrincipal()
                             printf("ARBOL BINARIO DE BUSQUEDA SIN FORZAR DEPENDENCIA FUNCIONAL\n");
                             printf("--------------AGENDA DE EVENTOS--------------\n");
                             resultado = evocacionABB(&arbol, fechaev);
-                            if(resultado != NULL){
+                            if (resultado != NULL)
+                            {
                                 printf("Fecha %s:\n", fechaev);
                                 while (resultado != NULL)
                                 {
@@ -272,8 +283,10 @@ void menuPrincipal()
                                     printf("-------------------------------------------------\n");
                                     resultado = resultado->sig;
                                 }
-                            } else{
-                                 printf("No hay eventos asociados a la fecha %s:\n",fechaev);
+                            }
+                            else
+                            {
+                                printf("No hay eventos asociados a la fecha %s:\n", fechaev);
                             }
                             system("pause");
                             break;
@@ -282,7 +295,8 @@ void menuPrincipal()
                             printf("ARBOL BINARIO DE BUSQUEDA FORZANDO DEPENDENCIA FUNCIONAL\n");
                             printf("--------------AGENDA DE EVENTOS--------------\n");
                             resultado = evocacionABB_F(&arbol_f, fechaev);
-                            if(resultado != NULL){
+                            if (resultado != NULL)
+                            {
                                 printf("Fecha %s:\n", fechaev);
                                 while (resultado != NULL)
                                 {
@@ -290,13 +304,16 @@ void menuPrincipal()
                                     printf("-------------------------------------------------\n");
                                     resultado = resultado->sig;
                                 }
-                            } else{
-                                 printf("No hay eventos asociados a la fecha %s:\n",fechaev);
+                            }
+                            else
+                            {
+                                printf("No hay eventos asociados a la fecha %s:\n", fechaev);
                             }
                             system("pause");
                             break;
                         case 0:
-                            printf(">> Volviendo...\n"); opcion2=0;
+                            printf(">> Volviendo...\n");
+                            opcion2 = 0;
                             break;
                         default:
                             printf(">> Opción invalida. Intente de nuevo.\n");
@@ -313,7 +330,7 @@ void menuPrincipal()
                     }
                     else
                         printf(">> No se encontraron eventos con esa fecha.\n");
-                    break;                
+                    break;
                 case 0:
                     printf(">> Volviendo...\n");
                     break;
@@ -506,25 +523,30 @@ int localizarLSOBB_F(LSOBB_F lista[], char fechaB[], Evento evBuscado, int total
 {
     *pos = inicioLSOBB_F(lista, fechaB, total);
 
-    if (*pos >= total || (strcmp(lista[*pos].fecha, fechaB) != 0))
+    if (*pos >= total)
+    {
+        return -1; // fuera de rango → fecha nueva
+    }
+
+    if (strcmp(lista[*pos].fecha, fechaB) != 0)
     {
         return -1; // No existe la fecha en la lista (ALTA de FECHA en lista[pos])
     }
 
-    *cur = lista[*pos].listaEventos; // cur apunta a la lvo de la fecha buscada
+    *cur = lista[*pos].listaEventos;
     *ant = *cur;
 
     while (hayMasLSOBB_F(*cur))
     {
         if ((*cur)->evento.hora == evBuscado.hora)
         {
-            return 1; // ya existe un evento a esa hora, estará apuntado por cur para darlo de baja eventualmente
+            return 1; // ya existe un evento a esa hora
         }
         *ant = *cur;
-        *cur = (*cur)->sig; // deme otro
+        *cur = (*cur)->sig;
     }
 
-    return 0; // no existe evento en esa hora, se insertará en lsobb_f[pos]->listaEventos ALTA
+    return 0; // fecha existe, pero evento nuevo
 }
 
 int altaLSOBB_F(LSOBB_F lsobb_F[], char fecha[], Evento ev, int *cargadosLSO_F)
@@ -552,8 +574,8 @@ int altaLSOBB_F(LSOBB_F lsobb_F[], char fecha[], Evento ev, int *cargadosLSO_F)
             lsobb_F[i + 1] = lsobb_F[i];
         }
         strcpy(lsobb_F[pos].fecha, fecha);
-        lsobb_F[pos].listaEventos = crearNodoLVO(ev);    
-        *cargadosLSO_F += 1;    //celda nueva    
+        lsobb_F[pos].listaEventos = crearNodoLVO(ev);
+        *cargadosLSO_F += 1; // celda nueva
     }
     else // caso: Dar de alta un evento en una fecha ya existente
     {
@@ -561,6 +583,7 @@ int altaLSOBB_F(LSOBB_F lsobb_F[], char fecha[], Evento ev, int *cargadosLSO_F)
         nuevo->sig = lsobb_F[pos].listaEventos;
         lsobb_F[pos].listaEventos = nuevo;
     }
+    eventosLSOBB_Fglobal++;
     return 1;
 }
 
@@ -574,21 +597,47 @@ int eliminarLSOBB_F(LSOBB_F lsobb_F[], char fecha[], Evento ev, int *cargadosLSO
     {
         if (compararEventos(ev, cur->evento) == 1)
         {
-            if (ant != cur)
-            { // si son diferentes, hay mas de 1 evento en la lista vinculada
-                ant->sig = cur->sig;
-                free((void *)cur);
-            }
-            else // hay que dar de baja la fecha, ya que no tiene mas eventos asociados
+            if (lsobb_F[pos].listaEventos->sig != NULL) // hay más de un evento en la lista
             {
-                free((void *)cur);
-                int i = pos;
-                for (i; i < (*cargadosLSO_F) - 1; i++)
+                if(cur == ant){ // el evento esta en la cabecera y HAY mas eventos.
+                    lsobb_F[pos].listaEventos = lsobb_F[pos].listaEventos->sig;
+                    free((void *)cur);
+                }else{
+                    ant->sig = cur->sig; 
+                    free((void *)cur);
+                }
+            }
+            else // solo hay un evento en la lista → eliminar fecha
+            {
+                // Liberar toda la sublista de eventos
+                NodoEvento *aux = lsobb_F[pos].listaEventos;
+                while (aux != NULL)
+                {
+                    NodoEvento *temp = aux;
+                    aux = aux->sig;
+                    free(temp);
+                }
+                int resultadoCURSIG=-1;
+                if(cur->sig == NULL){
+                    resultadoCURSIG=0;
+                } else {
+                    resultadoCURSIG=1;
+                }
+                // Corrimiento de celdas
+                for (int i = pos; i < (*cargadosLSO_F) - 1; i++)
                 {
                     lsobb_F[i] = lsobb_F[i + 1];
                 }
-                *cargadosLSO_F -= 1;                
-            }            
+
+                // Limpiar la última celda que quedó duplicada
+                lsobb_F[*cargadosLSO_F - 1].listaEventos = NULL;
+                lsobb_F[*cargadosLSO_F - 1].fecha[0] = '\0';
+
+                (*cargadosLSO_F)--;
+                
+            }
+
+            eventosLSOBB_Fglobal--;
             return 1; // se elimino con exito
         }
     }
@@ -598,7 +647,8 @@ int eliminarLSOBB_F(LSOBB_F lsobb_F[], char fecha[], Evento ev, int *cargadosLSO
 NodoEvento *evocacionLSOBB_F(LSOBB_F lsobb_F[], char fechaBuscada[], int cargadosLSO_F)
 {
     int pos = inicioLSOBB_F(lsobb_F, fechaBuscada, cargadosLSO_F);
-    if((lsobb_F[pos].fecha,fechaBuscada)==0){
+    if (strcmp(lsobb_F[pos].fecha, fechaBuscada) == 0)
+    {
         return lsobb_F[pos].listaEventos;
     }
     return NULL;
@@ -677,7 +727,7 @@ int inicioABB(ABB *arbol, char fecha[])
     return 1; // se encontro la primer fecha
 }
 
-int hayMasABB(ABB* arbol, char fechaBuscada[])
+int hayMasABB(ABB *arbol, char fechaBuscada[])
 {
     if (arbol->cur != NULL && strcmp(arbol->cur->fecha, fechaBuscada) == 0)
     {
@@ -694,8 +744,8 @@ int localizarABB(ABB *arbol, char fecha[], Evento ev)
         return 0; // no esta cargada la fecha
     }
 
-    NodoABB* auxCur=arbol->cur;
-    NodoABB* auxAnt=arbol->ant;
+    NodoABB *auxCur = arbol->cur;
+    NodoABB *auxAnt = arbol->ant;
 
     while (hayMasABB(arbol, fecha))
     {
@@ -706,10 +756,10 @@ int localizarABB(ABB *arbol, char fecha[], Evento ev)
         arbol->ant = arbol->cur;
         arbol->cur = arbol->cur->izq;
     }
-    
+
     arbol->cur = auxCur;
     arbol->ant = auxAnt;
-    printf("CUR fecha: %s\n",arbol->cur->fecha);
+    printf("CUR fecha: %s\n", arbol->cur->fecha);
     return 0; // No existe evento a esa hora, cur y ant vuelven a su posicion (CUR NO DEBERIA SER NULL)
 }
 
@@ -743,7 +793,7 @@ int altaABB(ABB *arbol, char fecha[], Evento evento, int *cantCargadosABB)
         else
         {
             (arbol->ant)->der = nodo; // mayor → derecha
-        }       
+        }
     }
     *cantCargadosABB += 1;
     return 1;
@@ -754,17 +804,23 @@ int eliminarABB(ABB *arbol, char fecha[], Evento evento, int *cantCargadosABB)
     int res = localizarABB(arbol, fecha, evento);
     if (res == 1)
     {
-        if(arbol->cur->der == NULL && arbol->cur->izq == NULL){
+        if (arbol->cur->der == NULL && arbol->cur->izq == NULL)
+        {
             printf("SIN HIJOS\n");
-        } else if (arbol->cur->der != NULL && arbol->cur->izq == NULL) {
+        }
+        else if (arbol->cur->der != NULL && arbol->cur->izq == NULL)
+        {
             printf("SOLO HIJO DER\n");
-        } else if (arbol->cur->der == NULL && arbol->cur->izq != NULL) {
+        }
+        else if (arbol->cur->der == NULL && arbol->cur->izq != NULL)
+        {
             printf("SOLO HIJO IZQ\n");
-        } else {
+        }
+        else
+        {
             printf("DOS HIJOS\n");
-        }        
-    }    
-    printf("ENTRANDO EN BAJA ABB, fecha: %s FECHA DE CUR: %s\n",fecha,arbol->cur->fecha);
+        }
+    }
     if (res == 0)
     {
         return 0; // No encontrado
@@ -859,21 +915,27 @@ int eliminarABB(ABB *arbol, char fecha[], Evento evento, int *cantCargadosABB)
     return 1;
 }
 
-//al recibir chequear si es NULL
-NodoEvento *evocacionABB(ABB *arbol, char fechaBuscar[]) {
+// al recibir chequear si es NULL
+NodoEvento *evocacionABB(ABB *arbol, char fechaBuscar[])
+{
     NodoEvento *listaEventos = NULL;
     NodoEvento *ultimo = NULL;
 
-    if (inicioABB(arbol, fechaBuscar) == 0) {
+    if (inicioABB(arbol, fechaBuscar) == 0)
+    {
         return NULL; // no se encontró la fecha
     }
 
-    while (hayMasABB(arbol, fechaBuscar)) {
+    while (hayMasABB(arbol, fechaBuscar))
+    {
         NodoEvento *nuevo = crearNodoLVO(arbol->cur->evento);
 
-        if (listaEventos == NULL) {
+        if (listaEventos == NULL)
+        {
             listaEventos = nuevo;
-        } else {
+        }
+        else
+        {
             ultimo->sig = nuevo;
         }
         ultimo = nuevo;
@@ -1054,6 +1116,7 @@ int altaABB_F(ABB_F *arbol, char fecha[], Evento evento, int *total)
             }
         }
         (*total)++;
+        nodosABBF++;
         return 1;
     }
     else if (res == 0)
@@ -1185,7 +1248,10 @@ int eliminarABB_F(ABB_F *arbol, char fecha[], Evento evento, int *total)
                     }
                     free(mayorIzq);
                 }
+                nodosABBF--;
+                printf("------------ABBF BAJA DE NODO !!! ------------\n");
             }
+
             return 1;
         }
         anterior = actual;
@@ -1236,29 +1302,7 @@ void mostrarABB_FPreorden(NodoABB_F *nodo)
 
 //------------------------------
 
-/*
-void limpiarSublistasLSOBB_F(LSOBB_F lista_f[], int total)
-{
-    for (int i = 0; i < total; i++)
-    {
-        liberarSublistaEventos(lista_f[i].listaEventos);
-        lista_f[i].listaEventos = NULL;
-    }
-}
-
-void limpiarSublistasABB_F(NodoABB_F *nodo)
-{
-    if (nodo == NULL)
-        return;
-
-    limpiarSublistasABB_F(nodo->izq);
-    limpiarSublistasABB_F(nodo->der);
-
-    liberarSublistaEventos(nodo->listaEventos);
-    nodo->listaEventos = NULL;
-}
-
-void liberarSublistaEventos(NodoEvento *cabeza)
+void limpiarSublistaEventos(NodoEvento *cabeza)
 {
     NodoEvento *aux;
     while (cabeza != NULL)
@@ -1268,13 +1312,41 @@ void liberarSublistaEventos(NodoEvento *cabeza)
         free(aux);
     }
 }
-*/
+void limpiarABB(NodoABB *nodo)
+{
+    if (nodo == NULL)
+        return;
+
+    limpiarABB(nodo->izq);
+    limpiarABB(nodo->der);
+    free(nodo);
+}
+
+void limpiarABB_F(NodoABB_F *nodo)
+{
+    if (nodo == NULL)
+        return;
+    if (nodo->izq != NULL)
+    {
+        limpiarABB_F(nodo->izq);
+    }
+    if (nodo->der != NULL)
+    {
+        limpiarABB_F(nodo->der);
+    }
+    limpiarSublistaEventos(nodo->listaEventos);
+    free(nodo);
+}
+
 int Lectura_Operaciones(ABB *arbol, ABB_F *arbol_f, LSOBB lista[], LSOBB_F lista_f[], int *totalLSOBB, int *totalLSOBB_F, int *totalABB, int *totalABB_F)
 {
     FILE *fp;
     int codigoOperador;
     Evento aux;
     char fechaAux[11];
+
+    nodosABBF = 0;
+    eventosLSOBB_Fglobal = 0;
 
     if ((fp = fopen("Operaciones.txt", "r")) == NULL)
     {
@@ -1302,39 +1374,42 @@ int Lectura_Operaciones(ABB *arbol, ABB_F *arbol_f, LSOBB lista[], LSOBB_F lista
             { // ALTA
                 altaLSOBB(lista, evAux, totalLSOBB);
 
-                altaLSOBB_F(lista_f, fechaAux, aux, totalLSOBB_F);
+                if (altaLSOBB_F(lista_f, fechaAux, aux, totalLSOBB_F))
+                {
+                    printf("\nALTA LSO_F: %d\n\n", *totalLSOBB_F);
+                }
 
-                altaABB(arbol, fechaAux, aux, totalABB);
+                // altaABB(arbol, fechaAux, aux, totalABB);
 
                 altaABB_F(arbol_f, fechaAux, aux, totalABB_F);
             }
             else
             { // BAJA
-                if(eliminarLSOBB(lista, evAux, totalLSOBB)){
-                    printf("\nBAJA EVENTO\n");
-                }
-
-                if(eliminarLSOBB_F(lista_f, fechaAux, aux, totalLSOBB_F)){
-                     printf("BAJA LSOBBF %d\n",*totalLSOBB_F);
-                }
-
-                if(eliminarABB(arbol, fechaAux, aux, totalABB)){
-                    printf("BAJA ABB %d\n",*totalABB);
-                }
-
+                eliminarLSOBB(lista, evAux, totalLSOBB);
+                
+                                if (eliminarLSOBB_F(lista_f, fechaAux, aux, totalLSOBB_F))
+                                {
+                                    printf("BAJA LSOBBF %d\n\n", *totalLSOBB_F);
+                                }
+/*
+                                                if (eliminarABB(arbol, fechaAux, aux, totalABB))
+                                                {
+                                                    //printf("BAJA ABB %d\n", *totalABB);
+                                                }
+                                */
                 eliminarABB_F(arbol_f, fechaAux, aux, totalABB_F);
             }
         }
         else if (codigoOperador == 3)
         {
-            /* Evocar en estructuras
+            // Evocar en estructuras
             evocacionLSOBB(lista, fechaAux, *totalLSOBB);
 
             evocacionLSOBB_F(lista_f, fechaAux, *totalLSOBB_F);
 
-            evocacionABB(arbol, fechaAux);
+            //evocacionABB(arbol, fechaAux);
 
-            evocacionABB_F(arbol_f, fechaAux);*/
+            evocacionABB_F(arbol_f, fechaAux);
         }
         else
         {
@@ -1349,13 +1424,20 @@ int Lectura_Operaciones(ABB *arbol, ABB_F *arbol_f, LSOBB lista[], LSOBB_F lista
 void comparacionEstructuras(ABB *arbol, ABB_F *arbol_f, LSOBB lista[], LSOBB_F lista_f[], int *totalLSOBB, int *totalLSOBB_F, int *totalABB, int *totalABB_F)
 {
     int i = 0;
-    /* Limpiar Estructuras
-    limpiarSublistasLSOBB_F(lista_f, *totalLSOBB_F);
-    limpiarSublistasABB_F(*raiz_f);
-    *raiz = NULL;
-    *raiz_f = NULL;
     *totalLSOBB = 0;
-    *totalLSOBB_F = 0;*/
+    for (i = 0; i < *totalLSOBB_F; i++)
+    {
+        limpiarSublistaEventos(lista_f[i].listaEventos);
+        lista_f[i].listaEventos = NULL;
+    }
+    *totalLSOBB_F = 0;
+
+    limpiarABB(arbol->raiz);
+    limpiarABB_F(arbol_f->raiz);
+    arbol->raiz = NULL;
+    arbol_f->raiz = NULL;
+    *totalABB = 0;
+    *totalABB_F = 0;
 
     Lectura_Operaciones(arbol, arbol_f, lista, lista_f, totalLSOBB, totalLSOBB_F, totalABB, totalABB_F);
 }
@@ -1395,8 +1477,9 @@ void mostrarEvento(Evento e)
     printf("Lugar: %s\n", e.lugar);
 }
 
-void cuadroComp(void)
+void cuadroComp(int cargadoslso, int cargadoslso_f, int cargadosabb, int cargadosabb_f)
 {
+    
     system("cls");
     system("color 03");
     printf("##======================================================================================================##\n");
@@ -1404,17 +1487,17 @@ void cuadroComp(void)
     printf("##======================================================================================================##\n");
     printf("||                      ||  COSTOS LSOBB   ||   COSTOS LSOBB_F   ||   COSTOS ABB    ||   COSTOS ABB_F   ||\n");
     printf("##======================================================================================================##\n");
-    printf("|| MAX. EVOC. EX.       ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+    printf("|| MAX. EVOC.           ||     %.3f     ||     %.3f     ||      %.3f     ||\n", cLSOevoc.max, cLSO_Fevoc.max, cABBevoc.max);
 
-    printf("|| MED. EVOC. EX.       ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+    printf("|| MED. EVOC.           ||     %.3f     ||     %.3f     ||      %.3f     ||\n", cLSOevoc.sumatoria/cargadoslso, cLSO_Fevoc.sumatoria/cargadoslso_f, cABBevoc.sumatoria/cargadosabb, cABB_Fevoc.sumatoria/cargadosabb_f);
 
-    printf("|| MAX. ALTA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+    printf("|| MAX. ALTA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n", cLSOalta.max, cLSO_Falta.max, cABBalta.max, cABB_Falta.max);
 
-    printf("|| MED. ALTA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+    printf("|| MED. ALTA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n", cLSOalta.sumatoria/cargadoslso, cLSO_Falta.sumatoria/cargadoslso_f, cABBalta.sumatoria/cargadosabb, cABB_Falta.sumatoria/cargadosabb_f );
 
-    printf("|| MAX. BAJA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+    printf("|| MAX. BAJA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n", cLSObaja.max, cLSO_Fbaja.max, cABBbaja.max, cABB_Fbaja.max);
 
-    printf("|| MED. BAJA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n");
+    printf("|| MED. BAJA            ||     %.3f     ||     %.3f     ||      %.3f     ||\n",cLSObaja.sumatoria/cargadoslso, cLSO_Fbaja.sumatoria/cargadoslso_f, cABBbaja.sumatoria/cargadosabb, cABB_Fbaja.sumatoria/cargadosabb_f);
     // AGREGAR CONTROLES NECESARIOS Y VARIABLES
     printf("||============================================================================||\n");
     system("pause");
