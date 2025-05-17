@@ -12,7 +12,7 @@ Conclusión:
 El análisis muestra que LSOBB_F y ABB_F son muy eficientes en evocación gracias a su estructura agrupada por fecha, siendo LSOBB_F el más rápido.
 Para altas, ABB y ABB_F destacan por sus costos bajos, ya que insertan por punteros sin corrimientos, mientras que LSOBB sufre altos costos al mover celdas.
 En bajas, LSOBB_F y ABB_F reportan costo cero ya que en base a las operaciones del archivo leido, nunca se llega al caso de eliminar el ultimo evento de
-la sublista, evitando así corrimientos.
+la sublista, evitando así corrimientos. La misma situación ocurre con las evocaciones NO exitosas, en las operaciones ejecutadas no se consulta por eventos sin cargar.
 ABB sin forzar dependencia es el peor en evocación porque debe recorrer hacia la izquierda buscando fechas iguales, mantiene buen rendimiento en altas y bajas.
 En general, LSOBB_F es ideal para búsquedas rápidas, ABB_F equilibra bien todas las operaciones, y LSOBB conviene evitarlo en altas y bajas intensivas.
 
@@ -21,14 +21,16 @@ Esta conclusión esta respaldada por los resultados obtenidos en el siguiente cu
 ##======================================================================================================##
 ||                                    COMPARACION DE ESTRUCTURAS                                        ||
 ##======================================================================================================##
-||                      ||  COSTOS LSOBB   ||   COSTOS LSOBB_F   ||   COSTOS ABB    ||   COSTOS ABB_F   ||
+||                      || COSTOS LSOBB   ||COSTOS LSOBB_F ||   COSTOS ABB   ||  COSTOS ABB_F ||
 ##======================================================================================================##
-|| MAX. EVOC.           ||     9.000     ||     6.000     ||      38.000    ||      15.000    ||
-|| MED. EVOC.           ||     7.901     ||     6.000     ||      24.637    ||      8.055     ||
-|| MAX. ALTA            ||     289.000   ||     23.000    ||      0.500     ||      0.500     ||
-|| MED. ALTA            ||     75.617    ||     0.777     ||      0.500     ||      0.500     ||
-|| MAX. BAJA            ||     278.000   ||     0.000     ||      1.500     ||      0.000     ||
-|| MED. BAJA            ||     128.855   ||     0.000     ||      0.645     ||      0.000     ||
+|| MAX. ALTA            ||     282.000    ||     23.000    ||      0.500     ||     0.500     ||
+|| MED. ALTA            ||     70.810     ||     0.777     ||      0.500     ||      0.500    ||
+|| MAX. BAJA            ||     287.000    ||     0.000     ||      1.500     ||      0.000    ||
+|| MED. BAJA            ||     131.027    ||     0.000     ||      0.645     ||      0.000    ||
+|| MAX. EVOC EXITOSA    ||     25.000     ||     6.000     ||      38.000    ||      15.000   ||
+|| MED. EVOC EXITOSA    ||     17.857     ||     5.989     ||      24.637    ||      8.055    ||
+|| MAX. EVOC NO EXITOSA ||     0.000      ||     0.000     ||      0.000     ||      0.000    ||
+|| MED. EVOC NO EXITOSA ||     0.000      ||     0.000     ||      0.000     ||      0.000    ||
 ##======================================================================================================##
 
 */
@@ -329,21 +331,9 @@ void menuPrincipal()
                             system("cls");
                             printf("ARBOL BINARIO DE BUSQUEDA FORZANDO DEPENDENCIA FUNCIONAL\n");
                             printf("--------------AGENDA DE EVENTOS--------------\n");
+                            printf("FECHA: %s\n", fechaev);
+                            printf("---------------------------------------------\n");
                             evocacionABB_F(&arbol_f, fechaev);
-                            if (resultado != NULL)
-                            {
-                                printf("Fecha %s:\n", fechaev);
-                                while (resultado != NULL)
-                                {
-                                    mostrarEvento(resultado->evento);
-                                    printf("-------------------------------------------------\n");
-                                    resultado = resultado->sig;
-                                }
-                            }
-                            else
-                            {
-                                printf("No hay eventos asociados a la fecha %s:\n", fechaev);
-                            }
                             system("pause");
                             break;
                         case 0:
@@ -1194,7 +1184,6 @@ void evocacionABB_SP(ABB *arbol, char fechaBuscar[])
     NodoEvento *evAux;
     if (inicioABB(arbol, fechaBuscar) == 0)
     {
-
         cABBevocNE.sumatoria += cABBevocNE.temp;
         if (cABBevocNE.temp > cABBevocNE.max)
         {
@@ -1204,11 +1193,9 @@ void evocacionABB_SP(ABB *arbol, char fechaBuscar[])
     } 
     else
     {
-        int resHayMas = hayMasABB(arbol, fechaBuscar);
-        while (resHayMas != -1)
+        while (hayMasABB(arbol, fechaBuscar) != -1)
         {
             evAux = deme_otroABB(arbol, fechaBuscar);
-            resHayMas = hayMasABB(arbol, fechaBuscar);
         }
 
         if (cABBevoc.temp > cABBevoc.max)
@@ -1271,6 +1258,7 @@ int inicioABB_F(ABB_F *arbol, char fecha[])
 {
 
     cABB_Fevoc.temp = 0;
+    cABB_FevocNE.temp = 0;
 
     (arbol->cur) = (arbol->raiz);
     arbol->ant = arbol->cur;
@@ -1278,12 +1266,14 @@ int inicioABB_F(ABB_F *arbol, char fecha[])
     {
 
         cABB_Fevoc.temp++;
+        cABB_FevocNE.temp++;
 
         if (strcmp((arbol->cur)->fecha, fecha) != 0)
         {
             arbol->ant = arbol->cur; // actualizo el cursor del anterior
 
             cABB_Fevoc.temp++;
+            cABB_FevocNE.temp++;
 
             if (strcmp((arbol->cur)->fecha, fecha) > 0)
             {
@@ -1345,20 +1335,53 @@ int localizarABB_F(ABB_F *arbol, char fechaB[], Evento evBuscado, int total, Nod
 void evocacionABB_F(ABB_F arbol[], char fecha[])
 {
     int i = inicioABB_F(arbol, fecha);
+    NodoEvento* aux;
+    Evento evAux;
     if (i == 1)
     {
+        aux = arbol->cur->listaEventos; // aux apunta a la lvo de la fecha buscada
+        while (aux != NULL)
+        {
+            evAux = aux->evento;
+            printf("-------------------------------------\n");
+            mostrarEvento(evAux);
+            printf("-------------------------------------\n");
+            aux = aux->sig;
+        }                
+    }
+    else{
+        printf("No hay ningun evento asociado a la fecha: %s\n",fecha);
+    }
+}
 
+//evocaciones sin prints (para lectura de operaciones)
+void evocacionABB_F_SP(ABB_F arbol[], char fecha[])
+{
+    int i = inicioABB_F(arbol, fecha);
+    NodoEvento* aux;
+    Evento evAux;
+    if (i == 1)
+    {
+        aux = arbol->cur->listaEventos; // aux apunta a la lvo de la fecha buscada
+        while (aux != NULL)
+        {
+            evAux = aux->evento;
+            aux = aux->sig;
+        }  
         if (cABB_Fevoc.temp > cABB_Fevoc.max)
         {
             cABB_Fevoc.max = cABB_Fevoc.temp;
         }
         cABB_Fevoc.cantidad++;
         cABB_Fevoc.sumatoria += cABB_Fevoc.temp;
-
-        return arbol->cur->listaEventos;
     }
-    else
-        return NULL;
+    else{
+        cABB_FevocNE.cantidad++;
+        if(cABB_FevocNE.temp > cABB_FevocNE.max){
+            cABB_FevocNE.max=cABB_FevocNE.temp;
+        }
+        cABB_FevocNE.sumatoria += cABB_FevocNE.temp;
+    }
 }
 
 // ALTA
@@ -1662,7 +1685,7 @@ int Lectura_Operaciones(ABB *arbol, ABB_F *arbol_f, LSOBB lista[], LSOBB_F lista
     nodosABBF = 0;
     eventosLSOBB_Fglobal = 0;
 
-    if ((fp = fopen("OperacionesACOTADO.txt", "r")) == NULL)
+    if ((fp = fopen("Operaciones.txt", "r")) == NULL)
     {
         printf("Error al abrir el archivo de operaciones.\n");
         system("pause");
@@ -1714,7 +1737,7 @@ int Lectura_Operaciones(ABB *arbol, ABB_F *arbol_f, LSOBB lista[], LSOBB_F lista
 
             evocacionABB_SP(arbol, fechaAux);
 
-            //evocacionABB_F(arbol_f, fechaAux);
+            evocacionABB_F_SP(arbol_f, fechaAux);
         }
         else
         {
