@@ -382,7 +382,7 @@ int inicioLSOBB(LSOBB lista[], char fechaBuscada[], int total)
 
     int costoAux = 0;
 
-    while (inf <= sup)
+    while (inf < sup)
     {
         medio = (inf + sup) / 2; // testigo a izquierda
 
@@ -394,12 +394,17 @@ int inicioLSOBB(LSOBB lista[], char fechaBuscada[], int total)
         }
         else
         {
-            sup = medio - 1; // Buscamos a la izquierda
+            sup = medio; // Buscamos a la izquierda
         }
     }
 
+    costoAux++;
     cLSOevoc.temp = costoAux;
     cLSOevocNE.temp = costoAux;
+
+    if(strcmp(lista[inf].fecha, fechaBuscada) < 0){
+        return sup+1;
+    }
 
     return inf; // devolvemos el testigo, deberia ser donde comience la primer fecha
 }
@@ -605,7 +610,7 @@ int inicioLSOBB_F(LSOBB_F lista[], char fechaBuscada[], int total)
     cLSO_Fevoc.temp = 0;
     cLSO_FevocNE.temp = 0;
 
-    while (inf <= sup)
+    while (inf < sup)
     {
         medio = (inf + sup) / 2; // segmento más grande a izquierda
 
@@ -618,11 +623,33 @@ int inicioLSOBB_F(LSOBB_F lista[], char fechaBuscada[], int total)
         }
         else
         {
-            sup = medio - 1; // buscamos a la izquierda
+            sup = medio; // buscamos a la izquierda
         }
     }
 
+    cLSO_Fevoc.temp++;
+    cLSO_FevocNE.temp++;
+
+    if(strcmp(lista[inf].fecha, fechaBuscada) < 0){
+        return sup+1;
+    }
     return inf; // devolvemos el testigo a la izquierda
+}
+
+int hayMasLSOBB_F(NodoEvento *cur)
+{
+    if (cur != NULL)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+Evento deme_otroLSOBB_F(NodoEvento **cur, NodoEvento **ant){
+    Evento ev = (*cur)->evento;
+    *ant = *cur;
+    *cur = (*cur)->sig;
+    return ev;
 }
 
 // Localizar retorna: 1 si hay un evento en la fecha dada a esa hora, 0 si la fecha está y no hay evento a esa hora, -1 si NO esta la fecha.
@@ -642,21 +669,17 @@ int localizarLSOBB_F(LSOBB_F lista[], char fechaB[], Evento evBuscado, int total
 
     *cur = lista[*pos].listaEventos;
     *ant = *cur;
-    Evento evAux;
+    Evento evAux = lista[*pos].listaEventos->evento;
 
-    while (*cur != NULL)
-    {
-        evAux = (*cur)->evento;
-
-        if (evAux.hora == evBuscado.hora)
+    while (hayMasLSOBB_F(*cur))
+    {        
+        if ((*cur)->evento.hora == evBuscado.hora)
         {
-            return 1; // ya existe un evento a esa hora (posible baja en ant)
-        }
-        *ant = *cur;
-        *cur = (*cur)->sig;
+            return 1; // ya existe un evento a esa hora (posible baja en cur)
+        }          
+        deme_otroLSOBB_F(cur,ant);
     }
-
-    return 0; // fecha existe, pero evento nuevo (insertar en ant->sig)
+    return 0; // fecha existe, pero evento nuevo (insertar en cabeza de la lista)
 }
 
 int altaLSOBB_F(LSOBB_F lsobb_F[], char fecha[], Evento ev, int *cargadosLSO_F)
@@ -681,6 +704,7 @@ int altaLSOBB_F(LSOBB_F lsobb_F[], char fecha[], Evento ev, int *cargadosLSO_F)
     if (resultadoLocalizar == -1)
     { // caso: Dar de alta FECHA y evento
         int i;
+        NodoEvento* nuevo = crearNodoLVO(ev);
         for (i = *cargadosLSO_F - 1; i >= pos; i--)
         {
 
@@ -689,13 +713,14 @@ int altaLSOBB_F(LSOBB_F lsobb_F[], char fecha[], Evento ev, int *cargadosLSO_F)
             lsobb_F[i + 1] = lsobb_F[i];
         }
         strcpy(lsobb_F[pos].fecha, fecha);
-        lsobb_F[pos].listaEventos = crearNodoLVO(ev);
+        lsobb_F[pos].listaEventos = nuevo;
         *cargadosLSO_F += 1; // celda nueva
     }
     else // caso: Dar de alta un evento en una fecha ya existente
     {
         NodoEvento *nuevo = crearNodoLVO(ev);
-        ant->sig = nuevo; // Inserto al final de la lista
+        nuevo->sig = lsobb_F[pos].listaEventos; 
+        lsobb_F[pos].listaEventos = nuevo;  // Inserto en la cabeza de la lista vinculada
     }
     eventosLSOBB_Fglobal++;
 
@@ -706,7 +731,6 @@ int altaLSOBB_F(LSOBB_F lsobb_F[], char fecha[], Evento ev, int *cargadosLSO_F)
 
     cLSO_Falta.cantidad++;
     cLSO_Falta.sumatoria += cLSO_Falta.temp;
-
     return 1;
 }
 
@@ -724,7 +748,7 @@ int eliminarLSOBB_F(LSOBB_F lsobb_F[], char fecha[], Evento ev, int *cargadosLSO
         if (compararEventos(ev, cur->evento) == 1)
         {
             if (lsobb_F[pos].listaEventos->sig != NULL) // hay más de un evento en la lista
-            {
+            {                
                 if (cur == ant)
                 { // el evento esta en la cabecera y HAY mas eventos.
                     lsobb_F[pos].listaEventos = lsobb_F[pos].listaEventos->sig;
@@ -795,13 +819,13 @@ void evocacionLSOBB_F(LSOBB_F lsobb_F[], char fechaBuscada[], int cargadosLSO_F)
     if (strcmp(lsobb_F[pos].fecha, fechaBuscada) == 0)
     {
         NodoEvento *cur = lsobb_F[pos].listaEventos;
-        while (cur != NULL)
+        NodoEvento *aux = cur;
+        while (hayMasLSOBB_F(cur))
         {
-            evAux = cur->evento;
+            evAux = deme_otroLSOBB_F(&cur,&aux);
             printf("-------------------------------------\n");
             mostrarEvento(evAux);
             printf("-------------------------------------\n");
-            cur = cur->sig;
         }
     }
     else
@@ -831,10 +855,10 @@ void evocacionLSOBB_F_SP(LSOBB_F lsobb_F[], char fechaBuscada[], int cargadosLSO
         cLSO_Fevoc.cantidad++;
 
         NodoEvento *cur = lsobb_F[pos].listaEventos;
-        while (cur != NULL)
+        NodoEvento *aux = cur;
+        while (hayMasLSOBB_F(cur))
         {
-            evAux = cur->evento;
-            cur = cur->sig;
+            evAux = deme_otroLSOBB_F(&cur,&aux);
         }
     }
     else
@@ -889,24 +913,27 @@ NodoABB *crearnodoABB(char fecha[], Evento evento)
     return nodo_nuevo;
 }
 
-int inicioABB(ABB *arbol, char fecha[])
+void inicioABB(ABB *arbol)
 {
     arbol->cur = arbol->raiz;
     arbol->ant = NULL;
 
     cABBevoc.temp = 0;
     cABBevocNE.temp = 0;
+}
 
+int hayMasABB(ABB *arbol, char fechaBuscada[])
+{
     while (arbol->cur != NULL)
     {
-        int cmp = strcmp(fecha, arbol->cur->fecha);
+        int cmp = strcmp(fechaBuscada, arbol->cur->fecha);
 
         cABBevoc.temp++;
         cABBevocNE.temp++;
 
         if (cmp == 0)
         {
-            // Encontramos la primera coincidencia
+            // Encontramos una coincidencia
             return 1;
         }
         arbol->ant = arbol->cur;
@@ -922,63 +949,28 @@ int inicioABB(ABB *arbol, char fecha[])
     return 0; // no está cargada
 }
 
-int hayMasABB(ABB *arbol, char fechaBuscada[])
+NodoABB *deme_otroABB(ABB *arbol)
 {
-    if (arbol->cur != NULL)
-    {
-        cABBevoc.temp++;
-        cABBevocNE.temp++;
-
-        if (strcmp(arbol->cur->fecha, fechaBuscada) == 0)
-        {
-            return 1; // el nodo actual si es la fecha buscada
-        }
-        return 0; // hay mas nodos, el actual NO tiene la fecha, pero podria haber mas
-    }
-    return -1; // llegamos a un null (no hay mas)
-}
-
-NodoEvento *deme_otroABB(ABB *arbol, char fechaBuscada[])
-{
-    NodoEvento *ev;
+    NodoABB *ev;
     ev = arbol->cur;
 
-    cABBevoc.temp++;
-    cABBevocNE.temp++;
-
     arbol->ant = arbol->cur;
-    if (strcmp((arbol->cur)->fecha, fechaBuscada) >= 0)
-    {
-        arbol->cur = (arbol->cur)->izq; // menor o igual → izquierda
-    }
-    else
-    {
-        arbol->cur = (arbol->cur)->der; // mayor → derecha
-    }
+    arbol->cur = arbol->cur->izq;   // movemos el cursor al hijo izquierdo
     return ev;
 }
 
 // retorna 0 si no hay fecha o si no hay evento a esa hora, 1 si ya hay evento a esa hora.
 int localizarABB(ABB *arbol, char fecha[], Evento ev)
 {
-    NodoEvento *evAux;
-    if (inicioABB(arbol, fecha) == 0)
-    {
-        return 0; // no esta cargada la fecha
-    }
+    inicioABB(arbol);
     
-    int resHayMas = hayMasABB(arbol, fecha);
-    while (resHayMas != -1)
-    {        
-        if (resHayMas == 1)
+    while (hayMasABB(arbol, fecha))
+    {   
+        if (arbol->cur->evento.hora == ev.hora)
         {
-            if (arbol->cur->evento.hora == ev.hora)
-            {
-                return 1; // Ya existe evento a esa hora
-            }
-        }        
-        evAux = deme_otroABB(arbol, fecha);
-        resHayMas = hayMasABB(arbol, fecha);
+            return 1; // Ya existe evento a esa hora
+        }      
+        deme_otroABB(arbol);
     }
     return 0;
 }
@@ -1158,31 +1150,34 @@ int eliminarABB(ABB *arbol, char fecha[], Evento evento, int *cantCargadosABB)
 void evocacionABB(ABB *arbol, char fechaBuscar[])
 {
     Evento evAux;
-    if (inicioABB(arbol, fechaBuscar) == 0)
+    int a=0;
+    inicioABB(arbol);       
+    while (hayMasABB(arbol, fechaBuscar))
     {
-        printf("No hay eventos asociados a la fecha: %s\n",fechaBuscar);
+        evAux = deme_otroABB(arbol)->evento;
+        a++;
+        printf("-------------------------------------\n");
+        mostrarEvento(evAux);
+        printf("-------------------------------------\n");
     }
-    else {
-        evAux = arbol->cur->evento;
-        int resHayMas = hayMasABB(arbol, fechaBuscar);
-        while (resHayMas != -1)
-        {
-            if(resHayMas == 1){
-                printf("-------------------------------------\n");
-                mostrarEvento(evAux);
-                printf("-------------------------------------\n");
-            }
-            evAux = deme_otroABB(arbol, fechaBuscar)->evento;
-            resHayMas = hayMasABB(arbol, fechaBuscar);
-        }
+    if(a==0){
+        printf("No hay eventos asociados a la fecha: %s\n",fechaBuscar);
     }
 }
 
 // Evocacion sin print (para lectura de operaciones)
 void evocacionABB_SP(ABB *arbol, char fechaBuscar[])
 {
-    NodoEvento *evAux;
-    if (inicioABB(arbol, fechaBuscar) == 0)
+    NodoABB *evAux;
+    int a=0;     
+    
+    while (hayMasABB(arbol, fechaBuscar))
+    {
+        a++;
+        evAux = deme_otroABB(arbol);
+    }
+
+    if (a == 0)
     {
         cABBevocNE.sumatoria += cABBevocNE.temp;
         if (cABBevocNE.temp > cABBevocNE.max)
@@ -1190,14 +1185,7 @@ void evocacionABB_SP(ABB *arbol, char fechaBuscar[])
             cABBevocNE.max = cABBevocNE.temp;
         }
         cABBevocNE.cantidad++;        
-    } 
-    else
-    {
-        while (hayMasABB(arbol, fechaBuscar) != -1)
-        {
-            evAux = deme_otroABB(arbol, fechaBuscar);
-        }
-
+    } else {
         if (cABBevoc.temp > cABBevoc.max)
         {
             cABBevoc.max = cABBevoc.temp;
@@ -1205,6 +1193,7 @@ void evocacionABB_SP(ABB *arbol, char fechaBuscar[])
         cABBevoc.cantidad++;
         cABBevoc.sumatoria += cABBevoc.temp;
     }
+    
 }
 
 // PASAR LA RAIZ AL LLAMAR LA FUNCION
@@ -1296,13 +1285,20 @@ int inicioABB_F(ABB_F *arbol, char fecha[])
     return 1; // se encontro la primer fecha
 }
 
-int hayMasABB_F(NodoEvento *listaEventos)
+int hayMasABB_F(NodoEvento *cur)
 {
-    if (listaEventos != NULL)
+    if (cur != NULL)
     {
         return 1;
     }
     return 0;
+}
+
+Evento deme_otroABB_F(NodoEvento **cur, NodoEvento** ant){
+    Evento ev = (*cur)->evento;
+    *ant = (*cur);
+    *cur = (*cur)->sig;
+    return ev;
 }
 
 // Localizar retorna: 1 si hay un evento en la fecha dada a esa hora, 0 si la fecha está y no hay evento a esa hora, -1 si NO esta la fecha.
@@ -1317,16 +1313,14 @@ int localizarABB_F(ABB_F *arbol, char fechaB[], Evento evBuscado, int total, Nod
     *ant = *cur;
     Evento evAux;
 
-    while (*cur != NULL)
+    while (hayMasABB_F(*cur))
     {
-        evAux = (*cur)->evento;
+        evAux = deme_otroABB_F(cur,ant);
 
         if (evAux.hora == evBuscado.hora)
         {
-            return 1; // ya existe un evento a esa hora (posible baja en ant)
+            return 1; // ya existe un evento a esa hora (posible baja en cur)
         }
-        *ant = *cur;
-        *cur = (*cur)->sig;
     }
 
     return 0; // No existe evento a esa hora
@@ -1335,18 +1329,18 @@ int localizarABB_F(ABB_F *arbol, char fechaB[], Evento evBuscado, int total, Nod
 void evocacionABB_F(ABB_F arbol[], char fecha[])
 {
     int i = inicioABB_F(arbol, fecha);
-    NodoEvento* aux;
+    NodoEvento* aux, *curAnt;
     Evento evAux;
     if (i == 1)
     {
         aux = arbol->cur->listaEventos; // aux apunta a la lvo de la fecha buscada
-        while (aux != NULL)
+        curAnt = aux;
+        while (hayMasABB_F(aux))
         {
-            evAux = aux->evento;
+            evAux = deme_otroABB_F(&aux,&curAnt);
             printf("-------------------------------------\n");
             mostrarEvento(evAux);
             printf("-------------------------------------\n");
-            aux = aux->sig;
         }                
     }
     else{
@@ -1358,15 +1352,15 @@ void evocacionABB_F(ABB_F arbol[], char fecha[])
 void evocacionABB_F_SP(ABB_F arbol[], char fecha[])
 {
     int i = inicioABB_F(arbol, fecha);
-    NodoEvento* aux;
+    NodoEvento* aux, *curAnt;
     Evento evAux;
     if (i == 1)
     {
         aux = arbol->cur->listaEventos; // aux apunta a la lvo de la fecha buscada
-        while (aux != NULL)
+        curAnt = aux;
+        while (hayMasABB_F(aux))
         {
-            evAux = aux->evento;
-            aux = aux->sig;
+            evAux = deme_otroABB_F(&aux,&curAnt);
         }  
         if (cABB_Fevoc.temp > cABB_Fevoc.max)
         {
@@ -1405,28 +1399,14 @@ int altaABB_F(ABB_F *arbol, char fecha[], Evento evento, int *total)
             arbol->raiz = nuevo;
         }
         else
-        {
-            NodoABB_F *actual = arbol->raiz;
-            NodoABB_F *padre = NULL;
-            while (actual != NULL)
+        {            
+            if (strcmp(fecha, arbol->ant->fecha) < 0)
             {
-                padre = actual;
-                if (strcmp(fecha, actual->fecha) < 0)
-                {
-                    actual = actual->izq;
-                }
-                else
-                {
-                    actual = actual->der;
-                }
-            }
-            if (strcmp(fecha, padre->fecha) < 0)
-            {
-                padre->izq = nuevo;
+                arbol->ant->izq = nuevo;
             }
             else
             {
-                padre->der = nuevo;
+                arbol->ant->der = nuevo;
             }
         }
         (*total)++;
@@ -1449,8 +1429,9 @@ int altaABB_F(ABB_F *arbol, char fecha[], Evento evento, int *total)
         {
             return 0; // Error al crear evento
         }
-        // Insertar al final de la lista
-        ant->sig = nuevoEvento;
+        // Insertar al COMIENZO de la lvo
+        nuevoEvento->sig = arbol->cur->listaEventos;
+        arbol->cur->listaEventos = nuevoEvento;
         (*total)++;
         return 1;
     }
@@ -1566,7 +1547,6 @@ int eliminarABB_F(ABB_F *arbol, char fecha[], Evento evento, int *total)
                     strcpy(nodoAEliminar->fecha, mayorIzq->fecha);
                     nodoAEliminar->listaEventos = mayorIzq->listaEventos;
 
-                    // Ajustar enlaces
                     if (padreMayorIzq->der == mayorIzq)
                     {
                         padreMayorIzq->der = mayorIzq->izq;
@@ -1710,7 +1690,7 @@ int Lectura_Operaciones(ABB *arbol, ABB_F *arbol_f, LSOBB lista[], LSOBB_F lista
             if (codigoOperador == 1)
             { // ALTA
                 altaLSOBB(lista, evAux, totalLSOBB);
-
+                
                 altaLSOBB_F(lista_f, fechaAux, aux, totalLSOBB_F);
 
                 altaABB(arbol, fechaAux, aux, totalABB);
@@ -1729,7 +1709,7 @@ int Lectura_Operaciones(ABB *arbol, ABB_F *arbol_f, LSOBB lista[], LSOBB_F lista
             }
         }
         else if (codigoOperador == 3)
-        {
+        { 
             // Evocar en estructuras
             evocacionLSOBB_SP(lista, fechaAux, *totalLSOBB);
 
@@ -1761,7 +1741,7 @@ void comparacionEstructuras(ABB *arbol, ABB_F *arbol_f, LSOBB lista[], LSOBB_F l
     }
     *totalLSOBB_F = 0;
 
-    // limpiarABB(arbol->raiz);
+    limpiarABB(arbol->raiz);
     limpiarABB_F(arbol_f->raiz);
     arbol->raiz = NULL;
     arbol_f->raiz = NULL;
