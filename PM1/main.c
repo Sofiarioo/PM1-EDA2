@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <conio.h>
 
 /*
 PMI 1 - GRUPO 3
@@ -145,7 +146,7 @@ int nodosABBF;
 int eventosLSOBB_Fglobal;
 
 int main()
-{
+{   
     menuPrincipal();
     return 0;
 }
@@ -179,6 +180,7 @@ void menuPrincipal()
     do
     {
         system("cls");
+        system("color F");
         printf("=== Agenda Mensual ===\n");
         printf("1. Comparacion de Estructuras\n");
         printf("2. Administrar Estructuras\n");
@@ -190,11 +192,11 @@ void menuPrincipal()
         {
         case 1:
             comparacionEstructuras(&arbol, &arbol_f, lista, lista_f, &cargadosLSO, &cargadosLSO_F, &cargadosABB, &cargadosABB_F);
-            printf("\n\nTotal cargados lso: %d\n", cargadosLSO);
-            printf("\nFechas cargadas en lso_f: %d\nTotal eventos: %d\n\n", cargadosLSO_F, eventosLSOBB_Fglobal);
-            printf("Total cargados abb: %d\n", cargadosABB);
-            printf("\nFechas cargadas abb_f: %d\nTotal eventos: %d\n\n", nodosABBF, cargadosABB_F);
-
+            printf("\nEstructuras luego de las operaciones:\n\n");
+            printf("LSO: total de eventos cargados: %d\n", cargadosLSO);
+            printf("\nLSO_F: total de fechas cargadas %d\nTotal de eventos cargados: %d\n\n", cargadosLSO_F, eventosLSOBB_Fglobal);
+            printf("ABB: total de eventos cargados: %d\n", cargadosABB);
+            printf("\nABB_F: fechas cargadas: %d\nTotal de eventos cargados: %d\n\n", nodosABBF, cargadosABB_F);
             system("pause");
             break;
         case 2:
@@ -304,7 +306,7 @@ void menuPrincipal()
                             system("cls");
                             printf("LSO SIN FORZAR DEPENDENCIA FUNCIONAL\n");
                             printf("--------------AGENDA DE EVENTOS--------------\n");
-                            printf("FECHA: %s\n", fechaev);
+                            printf("\033[33mFECHA: %s\033[0m\n",fechaev);
                             printf("---------------------------------------------\n");
                             evocacionLSOBB(lista, fechaev, cargadosLSO);
                             system("pause");
@@ -313,7 +315,7 @@ void menuPrincipal()
                             system("cls");
                             printf("LSO FORZANDO DEPENDENCIA FUNCIONAL\n");
                             printf("--------------AGENDA DE EVENTOS--------------\n");
-                            printf("FECHA: %s\n", fechaev);
+                            printf("\033[33mFECHA: %s\033[0m\n",fechaev);
                             printf("---------------------------------------------\n");
                             evocacionLSOBB_F(lista_f, fechaev, cargadosLSO_F);
                             system("pause");
@@ -322,7 +324,7 @@ void menuPrincipal()
                             system("cls");
                             printf("ARBOL BINARIO DE BUSQUEDA SIN FORZAR DEPENDENCIA FUNCIONAL\n");
                             printf("--------------AGENDA DE EVENTOS--------------\n");
-                            printf("FECHA: %s\n", fechaev);
+                            printf("\033[33mFECHA: %s\033[0m\n",fechaev);
                             printf("---------------------------------------------\n");
                             evocacionABB(&arbol, fechaev);
                             system("pause");
@@ -331,7 +333,7 @@ void menuPrincipal()
                             system("cls");
                             printf("ARBOL BINARIO DE BUSQUEDA FORZANDO DEPENDENCIA FUNCIONAL\n");
                             printf("--------------AGENDA DE EVENTOS--------------\n");
-                            printf("FECHA: %s\n", fechaev);
+                            printf("\033[33mFECHA: %s\033[0m\n",fechaev);
                             printf("---------------------------------------------\n");
                             evocacionABB_F(&arbol_f, fechaev);
                             system("pause");
@@ -368,7 +370,7 @@ void menuPrincipal()
             printf(">> Saliendo...\n");
             break;
         default:
-            printf(">> Opción invalida. Intente de nuevo.\n");
+            printf(">> Opcion invalida. Intente de nuevo.\n");
         }
     } while (opc != 0);
 }
@@ -589,7 +591,7 @@ void mostrarLSOBB(LSOBB lista[], int cargados)
     {
         for (mod = i; mod < i + 5 && mod < cargados; mod++)
         {
-            printf("Fecha %s:\n", lista[mod].fecha);
+            printf("\033[33mFecha %s:\033[0m\n",lista[mod].fecha);
             mostrarEvento(lista[mod].evento);
             printf("-------------------------------------------------\n");
         }
@@ -880,7 +882,9 @@ void mostrarLSOBB_F(LSOBB_F lista[], int cargados)
     printf("--------------AGENDA DE EVENTOS--------------\n");
     for (i = 0; i < cargados; i++)
     {
-        printf("Fecha %s:\n", lista[i].fecha);
+        printf("---\n");
+        printf("\033[33mFecha %s:\033[0m\n",lista[i].fecha);
+        printf("---\n");
         NodoEvento *cur = lista[i].listaEventos;
         while (cur != NULL)
         {
@@ -1170,7 +1174,9 @@ void evocacionABB_SP(ABB *arbol, char fechaBuscar[])
 {
     NodoABB *evAux;
     int a=0;     
-    
+
+    inicioABB(arbol);
+
     while (hayMasABB(arbol, fechaBuscar))
     {
         a++;
@@ -1201,7 +1207,7 @@ void mostrarABBPreorden(NodoABB *nodo)
 {
     if (nodo != NULL)
     {
-        printf("Fecha nodo: %s\n", nodo->fecha);
+        printf("\033[33mFecha %s:\033[0m\n",nodo->fecha);
         mostrarEvento(nodo->evento);
 
         if (nodo->izq != NULL)
@@ -1583,13 +1589,16 @@ void mostrarABB_FPreorden(NodoABB_F *nodo)
 {
     if (nodo != NULL)
     {
-        printf("Fecha nodo: %s\n", nodo->fecha);
+        printf("---\n");
+        printf("\033[33mFecha %s:\033[0m\n",nodo->fecha);
+        printf("---\n");
 
         // Mostrar todos los eventos de la lista de esta fecha
         NodoEvento *cur = nodo->listaEventos;
         while (cur != NULL)
         {
             mostrarEvento(cur->evento);
+            printf("---\n");
             cur = cur->sig;
         }
 
@@ -1726,7 +1735,8 @@ int Lectura_Operaciones(ABB *arbol, ABB_F *arbol_f, LSOBB lista[], LSOBB_F lista
     }
 
     fclose(fp);
-    system("pause");
+    printf("\033[32mArchivo de operaciones leido. Presione una tecla para mostrar el cuadro comparativo\033[0m\n");
+    getch();
     return 1;
 }
 
@@ -1795,40 +1805,40 @@ void cuadroComp()
     printf("##======================================================================================================##\n");
     printf("||                                    COMPARACION DE ESTRUCTURAS                                        ||\n");
     printf("##======================================================================================================##\n");
-    printf("||                      ||  COSTOS LSOBB   ||   COSTOS LSOBB_F   ||   COSTOS ABB    ||   COSTOS ABB_F   ||\n");
+    printf("||                      ||  COSTOS LSOBB  || COSTOS LSOBB_F ||   COSTOS ABB   ||  COSTOS ABB_F  ||\n");
     printf("##======================================================================================================##\n");
 
-    printf("|| MAX. ALTA            ||     %.3f    ||     %.3f     ||      %.3f     ||     %.3f     ||\n",
+    printf("|| MAX. ALTA            ||     %.3f    ||     %.3f    ||      %.3f     ||      %.3f    ||\n",
            cLSOalta.max, cLSO_Falta.max, cABBalta.max, cABB_Falta.max);
 
-    printf("|| MED. ALTA            ||     %.3f     ||     %.3f     ||      %.3f     ||      %.3f     ||\n",
+    printf("|| MED. ALTA            ||     %.3f     ||     %.3f     ||      %.3f     ||      %.3f    ||\n",
            (cLSOalta.cantidad != 0) ? cLSOalta.sumatoria / cLSOalta.cantidad : 0.0,
            (cLSO_Falta.cantidad != 0) ? cLSO_Falta.sumatoria / cLSO_Falta.cantidad : 0.0,
            (cABBalta.cantidad != 0) ? cABBalta.sumatoria / cABBalta.cantidad : 0.0,
            (cABB_Falta.cantidad != 0) ? cABB_Falta.sumatoria / cABB_Falta.cantidad : 0.0);
 
-    printf("|| MAX. BAJA            ||     %.3f    ||     %.3f     ||      %.3f     ||      %.3f     ||\n",
+    printf("|| MAX. BAJA            ||     %.3f    ||     %.3f     ||      %.3f     ||      %.3f    ||\n",
            cLSObaja.max, cLSO_Fbaja.max, cABBbaja.max, cABB_Fbaja.max);
 
-    printf("|| MED. BAJA            ||     %.3f    ||     %.3f     ||      %.3f     ||      %.3f     ||\n",
-           (cLSOevoc.cantidad != 0) ? cLSObaja.sumatoria / cLSObaja.cantidad : 0.0,
-           (cLSO_Fevoc.cantidad != 0) ? cLSO_Fbaja.sumatoria / cLSO_Fbaja.cantidad : 0.0,
-           (cABBevoc.cantidad != 0) ? cABBbaja.sumatoria / cABBbaja.cantidad : 0.0,
-           (cABB_Fevoc.cantidad != 0) ? cABB_Fbaja.sumatoria / cABB_Fbaja.cantidad : 0.0);
+    printf("|| MED. BAJA            ||     %.3f    ||     %.3f     ||      %.3f     ||      %.3f    ||\n",
+           (cLSObaja.cantidad != 0) ? cLSObaja.sumatoria / cLSObaja.cantidad : 0.0,
+           (cLSO_Fbaja.cantidad != 0) ? cLSO_Fbaja.sumatoria / cLSO_Fbaja.cantidad : 0.0,
+           (cABBbaja.cantidad != 0) ? cABBbaja.sumatoria / cABBbaja.cantidad : 0.0,
+           (cABB_Fbaja.cantidad != 0) ? cABB_Fbaja.sumatoria / cABB_Fbaja.cantidad : 0.0);
 
-    printf("|| MAX. EVOC EXITOSA    ||     %.3f     ||     %.3f     ||      %.3f     ||      %.3f    ||\n",
+    printf("|| MAX. EVOC EXITOSA    ||     %.3f     ||     %.3f     ||      %.3f    ||      %.3f   ||\n",
            cLSOevoc.max, cLSO_Fevoc.max, cABBevoc.max, cABB_Fevoc.max);
 
-    printf("|| MED. EVOC EXITOSA    ||     %.3f     ||     %.3f     ||      %.3f     ||      %.3f    ||\n",
+    printf("|| MED. EVOC EXITOSA    ||     %.3f     ||     %.3f     ||      %.3f    ||      %.3f    ||\n",
            (cLSOevoc.cantidad != 0) ? cLSOevoc.sumatoria / cLSOevoc.cantidad : 0.0,
            (cLSO_Fevoc.cantidad != 0) ? cLSO_Fevoc.sumatoria / cLSO_Fevoc.cantidad : 0.0,
            (cABBevoc.cantidad != 0) ? cABBevoc.sumatoria / cABBevoc.cantidad : 0.0,
            (cABB_Fevoc.cantidad != 0) ? cABB_Fevoc.sumatoria / cABB_Fevoc.cantidad : 0.0);
 
-    printf("|| MAX. EVOC NO EXITOSA ||     %.3f     ||     %.3f     ||      %.3f     ||      %.3f    ||\n",
+    printf("|| MAX. EVOC NO EXITOSA ||     %.3f      ||     %.3f     ||      %.3f     ||      %.3f    ||\n",
            cLSOevocNE.max, cLSO_FevocNE.max, cABBevocNE.max, cABB_FevocNE.max);
 
-    printf("|| MED. EVOC NO EXITOSA ||     %.3f     ||     %.3f     ||      %.3f     ||      %.3f    ||\n",
+    printf("|| MED. EVOC NO EXITOSA ||     %.3f      ||     %.3f     ||      %.3f     ||      %.3f    ||\n",
            (cLSOevocNE.cantidad != 0) ? cLSOevocNE.sumatoria / cLSOevocNE.cantidad : 0.0,
            (cLSO_FevocNE.cantidad != 0) ? cLSO_FevocNE.sumatoria / cLSO_FevocNE.cantidad : 0.0,
            (cABBevocNE.cantidad != 0) ? cABBevocNE.sumatoria / cABBevocNE.cantidad : 0.0,
