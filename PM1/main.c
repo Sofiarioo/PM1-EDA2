@@ -22,14 +22,14 @@ Esta conclusión esta respaldada por los resultados obtenidos en el siguiente cu
 ##======================================================================================================##
 ||                                    COMPARACION DE ESTRUCTURAS                                        ||
 ##======================================================================================================##
-||                      || COSTOS LSOBB   ||COSTOS LSOBB_F ||   COSTOS ABB   ||  COSTOS ABB_F ||
+||                      ||  COSTOS LSOBB  || COSTOS LSOBB_F ||   COSTOS ABB   ||  COSTOS ABB_F  ||
 ##======================================================================================================##
-|| MAX. ALTA            ||     282.000    ||     23.000    ||      0.500     ||     0.500     ||
+|| MAX. ALTA            ||     282.000    ||     23.000    ||      0.500     ||      0.500    ||
 || MED. ALTA            ||     70.810     ||     0.777     ||      0.500     ||      0.500    ||
 || MAX. BAJA            ||     287.000    ||     0.000     ||      1.500     ||      0.000    ||
 || MED. BAJA            ||     131.027    ||     0.000     ||      0.645     ||      0.000    ||
-|| MAX. EVOC EXITOSA    ||     25.000     ||     6.000     ||      38.000    ||      15.000   ||
-|| MED. EVOC EXITOSA    ||     17.857     ||     5.989     ||      24.637    ||      8.055    ||
+|| MAX. EVOC EXITOSA    ||     26.000     ||     7.000     ||      21.000    ||      15.000   ||
+|| MED. EVOC EXITOSA    ||     18.791     ||     6.945     ||      13.967    ||      8.055    ||
 || MAX. EVOC NO EXITOSA ||     0.000      ||     0.000     ||      0.000     ||      0.000    ||
 || MED. EVOC NO EXITOSA ||     0.000      ||     0.000     ||      0.000     ||      0.000    ||
 ##======================================================================================================##
@@ -488,7 +488,7 @@ void evocacionLSOBB_SP(LSOBB lsobb[], char fechaBuscada[], int cargadosLSO)
 
     if (a == 0) // evocacion NO exitosa
     {
-        cLSOevocNE.sumatoria += cLSOevocNE.temp++;
+        cLSOevocNE.sumatoria += cLSOevocNE.temp;
         if (cLSOevocNE.temp > cLSOevocNE.max)
         {
             cLSOevocNE.max = cLSOevocNE.temp;
@@ -498,7 +498,7 @@ void evocacionLSOBB_SP(LSOBB lsobb[], char fechaBuscada[], int cargadosLSO)
     else
     {
 
-        cLSOevoc.sumatoria += cLSOevoc.temp++;
+        cLSOevoc.sumatoria += cLSOevoc.temp;
         if (cLSOevoc.temp > cLSOevoc.max)
         {
             cLSOevoc.max = cLSOevoc.temp;
