@@ -21,10 +21,12 @@ En general, LSOBB_F es ideal para búsquedas rápidas, ABB_F equilibra bien toda
 Esta conclusión esta respaldada por los resultados obtenidos en el siguiente cuadro:
 
 ##======================================================================================================##
+||                                    COMPARACION DE ESTRUCTURAS                                        ||
+##======================================================================================================##
 ||                      ||  COSTOS LSOBB  || COSTOS LSOBB_F ||   COSTOS ABB   ||  COSTOS ABB_F  ||
 ##======================================================================================================##
 || MAX. ALTA            ||     282.000    ||     23.000    ||      0.500     ||      1.000    ||
-|| MED. ALTA            ||     70.810     ||     0.777     ||      0.500     ||      0.550    ||
+|| MED. ALTA            ||     70.810     ||     0.777     ||      0.500     ||      1.000    ||
 || MAX. BAJA            ||     287.000    ||     0.000     ||      1.500     ||      0.500    ||
 || MED. BAJA            ||     131.027    ||     0.000     ||      0.645     ||      0.500    ||
 || MAX. EVOC EXITOSA    ||     25.000     ||     7.000     ||      21.000    ||      15.000   ||
@@ -1448,7 +1450,7 @@ int altaABB_F(ABB_F *arbol, char fecha[], Evento evento, int *total)
         nuevoEvento->sig = arbol->cur->listaEventos;
         arbol->cur->listaEventos = nuevoEvento;
 
-        cABB_Falta.temp += 0.5;     //actualizacion puntero de lvo
+        cABB_Falta.temp += 1;     //actualizacion puntero de lvo + actualizacion puntero evento nuevo a sig
 
         if (cABB_Falta.temp > cABB_Falta.max)
         {
@@ -1773,6 +1775,23 @@ void comparacionEstructuras(ABB *arbol, ABB_F *arbol_f, LSOBB lista[], LSOBB_F l
     *totalABB = 0;
     *totalABB_F = 0;
 
+    Costos cLSOevoc = {0, 0, 0, 0};
+    Costos cLSOevocNE = {0, 0, 0, 0};
+    Costos cLSOalta = {0, 0, 0, 0};
+    Costos cLSObaja = {0, 0, 0, 0};
+    Costos cLSO_Fevoc = {0, 0, 0, 0};
+    Costos cLSO_FevocNE = {0, 0, 0, 0};
+    Costos cLSO_Falta = {0, 0, 0, 0};
+    Costos cLSO_Fbaja = {0, 0, 0, 0};
+    Costos cABBevoc = {0, 0, 0, 0};
+    Costos cABBevocNE = {0, 0, 0, 0};
+    Costos cABBalta = {0, 0, 0, 0};
+    Costos cABBbaja = {0, 0, 0, 0};
+    Costos cABB_Fevoc = {0, 0, 0, 0};
+    Costos cABB_FevocNE = {0, 0, 0, 0};
+    Costos cABB_Falta = {0, 0, 0, 0};
+    Costos cABB_Fbaja = {0, 0, 0, 0};
+
     Lectura_Operaciones(arbol, arbol_f, lista, lista_f, totalLSOBB, totalLSOBB_F, totalABB, totalABB_F);
     cuadroComp();
 }
@@ -1822,7 +1841,6 @@ void cuadroComp()
     printf("##======================================================================================================##\n");
     printf("||                      ||  COSTOS LSOBB  || COSTOS LSOBB_F ||   COSTOS ABB   ||  COSTOS ABB_F  ||\n");
     printf("##======================================================================================================##\n");
-
     printf("|| MAX. ALTA            ||     %.3f    ||     %.3f    ||      %.3f     ||      %.3f    ||\n",
            cLSOalta.max, cLSO_Falta.max, cABBalta.max, cABB_Falta.max);
 
